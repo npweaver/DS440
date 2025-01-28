@@ -1,0 +1,70 @@
+import requests
+import time
+from typing import Set, Optional
+
+def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.0, max_depth: int = 2) -> Set[str]:
+    """
+    Recursively collect unique Steam IDs from a user's friend network.
+    
+    Args:
+        api_key: Steam Web API key
+        initial_steam_id: Starting user's Steam ID
+        delay: Delay between API calls in seconds to avoid rate limiting
+        max_depth: Maximum depth of recursion to prevent excessive API calls
+        
+    Returns:
+        Set of unique Steam IDs
+    """
+    def get_friends(steam_id: str) -> Optional[list]:
+        """Helper function to make the API call for a single user."""
+        url = f"http://api.steampowered.com/ISteamUser/GetFriendList/v0001/"
+        params = {
+            "key": api_key,
+            "steamid": steam_id,
+            "relationship": "friend"
+        }
+        
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("friendslist", {}).get("friends", [])
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching friends for {steam_id}: {e}")
+            return None
+        except ValueError as e:
+            print(f"Error parsing response for {steam_id}: {e}")
+            return None
+    
+    def crawl(steam_id: str, current_depth: int, visited: Set[str]):
+        """Recursive helper function to crawl the friend network."""
+        if current_depth > max_depth or steam_id in visited:
+            return
+        
+        visited.add(steam_id)
+        friends = get_friends(steam_id)
+        
+        if friends is None:
+            return
+            
+        for friend in friends:
+            friend_id = friend["steamid"]
+            if friend_id not in visited:
+                time.sleep(delay)  # Respect rate limits
+                crawl(friend_id, current_depth + 1, visited)
+    
+    visited_ids = set()
+    crawl(initial_steam_id, 1, visited_ids)
+    return visited_ids
+
+# Example usage
+if __name__ == "__main__":
+    API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    INITIAL_STEAM_ID = "??????????"
+    
+    # Collect unique Steam IDs with a 1-second delay between requests and max depth of 2
+    unique_steam_ids = get_friends_recursive(API_KEY, INITIAL_STEAM_ID, delay=1.0, max_depth=2)
+    
+    print(f"Found {len(unique_steam_ids)} unique Steam IDs:")
+    for steam_id in unique_steam_ids:
+        print(steam_id)
