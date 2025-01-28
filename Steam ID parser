@@ -1,6 +1,7 @@
 import requests
 import time
 from typing import Set, Optional
+from datetime import datetime
 
 def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.0, max_depth: int = 2) -> Set[str]:
     """
@@ -15,6 +16,21 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
     Returns:
         Set of unique Steam IDs
     """
+    # Progress tracking variables
+    stats = {
+        'processed': 0,
+        'private': 0,
+        'failed': 0,
+        'start_time': datetime.now()
+    }
+
+    def print_progress():
+        """Print current progress statistics."""
+        elapsed_time = (datetime.now() - stats['start_time']).total_seconds()
+        print(f"\rProcessed: {stats['processed']} | Private: {stats['private']} | "
+              f"Failed: {stats['failed']} | Total Found: {len(visited_ids)} | "
+              f"Time: {elapsed_time:.1f}s", end='')
+
     def get_friends(steam_id: str) -> Optional[list]:
         """Helper function to make the API call for a single user."""
         url = f"http://api.steampowered.com/ISteamUser/GetFriendList/v0001/"
@@ -26,14 +42,35 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
         
         try:
             response = requests.get(url, params=params)
+            
+            # Specific handling for private profiles (401 Unauthorized)
+            if response.status_code == 401:
+                stats['private'] += 1
+                print_progress()
+                print(f"\nSkipping private profile: {steam_id}")
+                return None
+                
             response.raise_for_status()
             data = response.json()
+            stats['processed'] += 1
+            print_progress()
             return data.get("friendslist", {}).get("friends", [])
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching friends for {steam_id}: {e}")
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 401:
+                stats['private'] += 1
+                print_progress()
+                print(f"\nSkipping private profile: {steam_id}")
+            else:
+                stats['failed'] += 1
+                print_progress()
+                print(f"\nHTTP Error for {steam_id}: {e}")
             return None
-        except ValueError as e:
-            print(f"Error parsing response for {steam_id}: {e}")
+            
+        except (requests.exceptions.RequestException, ValueError) as e:
+            stats['failed'] += 1
+            print_progress()
+            print(f"\nError fetching friends for {steam_id}: {e}")
             return None
     
     def crawl(steam_id: str, current_depth: int, visited: Set[str]):
@@ -42,6 +79,8 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
             return
         
         visited.add(steam_id)
+        print(f"\nDepth {current_depth}: Processing {steam_id}")
+        
         friends = get_friends(steam_id)
         
         if friends is None:
@@ -54,7 +93,24 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
                 crawl(friend_id, current_depth + 1, visited)
     
     visited_ids = set()
-    crawl(initial_steam_id, 1, visited_ids)
+    print(f"Starting crawl at {stats['start_time'].strftime('%H:%M:%S')}")
+    print(f"Max depth: {max_depth} | Delay between requests: {delay}s")
+    
+    try:
+        crawl(initial_steam_id, 1, visited_ids)
+    except KeyboardInterrupt:
+        print("\nCrawl interrupted by user")
+    
+    end_time = datetime.now()
+    total_time = (end_time - stats['start_time']).total_seconds()
+    
+    print(f"\n\nCrawl completed at {end_time.strftime('%H:%M:%S')}")
+    print(f"Total time: {total_time:.1f} seconds")
+    print(f"Profiles processed successfully: {stats['processed']}")
+    print(f"Private profiles encountered: {stats['private']}")
+    print(f"Failed requests (other errors): {stats['failed']}")
+    print(f"Unique Steam IDs found: {len(visited_ids)}")
+    
     return visited_ids
 
 # Example usage
@@ -65,6 +121,6 @@ if __name__ == "__main__":
     # Collect unique Steam IDs with a 1-second delay between requests and max depth of 2
     unique_steam_ids = get_friends_recursive(API_KEY, INITIAL_STEAM_ID, delay=1.0, max_depth=2)
     
-    print(f"Found {len(unique_steam_ids)} unique Steam IDs:")
+    print("\nFound Steam IDs:")
     for steam_id in unique_steam_ids:
         print(steam_id)
