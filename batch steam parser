@@ -1,0 +1,173 @@
+import requests
+import time
+import csv
+from typing import Set, Optional, List, Deque
+from datetime import datetime
+from pathlib import Path
+from collections import deque
+
+def get_friends_recursive(api_key: str, initial_steam_ids: List[str], output_file: str = "steam_friends.csv", 
+                         delay: float = 1.0, max_depth: int = 2, batch_size: int = 100) -> Set[str]:
+    """
+    Recursively collect unique Steam IDs from multiple users' friend networks using batch processing.
+    
+    Args:
+        api_key: Steam Web API key
+        initial_steam_ids: List of starting Steam IDs
+        output_file: Path to CSV file for saving results
+        delay: Delay between API calls in seconds to avoid rate limiting
+        max_depth: Maximum depth of recursion to prevent excessive API calls
+        batch_size: Number of IDs to collect before processing (max 100)
+        
+    Returns:
+        Set of unique Steam IDs
+    """
+    stats = {
+        'processed': 0,
+        'private': 0,
+        'failed': 0,
+        'start_time': datetime.now()
+    }
+
+    def print_progress():
+        """Print current progress statistics."""
+        elapsed_time = (datetime.now() - stats['start_time']).total_seconds()
+        print(f"\rProcessed: {stats['processed']} | Private: {stats['private']} | "
+              f"Failed: {stats['failed']} | Total Found: {len(visited_ids)} | "
+              f"Time: {elapsed_time:.1f}s", end='')
+
+    def save_to_csv(steam_ids: List[str], depth: int):
+        """Save multiple Steam IDs to the CSV file."""
+        timestamp = datetime.now().isoformat()
+        with open(output_file, 'a', newline='') as f:
+            writer = csv.writer(f)
+            for steam_id in steam_ids:
+                writer.writerow([steam_id, depth, timestamp])
+
+    def get_friends_batch(steam_ids: List[str]) -> dict:
+        """Process a batch of Steam IDs to get their friends."""
+        results = {}
+        
+        for steam_id in steam_ids:
+            url = f"http://api.steampowered.com/ISteamUser/GetFriendList/v0001/"
+            params = {
+                "key": api_key,
+                "steamid": steam_id,
+                "relationship": "friend"
+            }
+            
+            try:
+                response = requests.get(url, params=params)
+                
+                if response.status_code == 401:
+                    stats['private'] += 1
+                    print(f"\nSkipping private profile: {steam_id}")
+                    results[steam_id] = None
+                    continue
+                    
+                response.raise_for_status()
+                data = response.json()
+                stats['processed'] += 1
+                results[steam_id] = data.get("friendslist", {}).get("friends", [])
+                
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 401:
+                    stats['private'] += 1
+                    print(f"\nSkipping private profile: {steam_id}")
+                else:
+                    stats['failed'] += 1
+                    print(f"\nHTTP Error for {steam_id}: {e}")
+                results[steam_id] = None
+                
+            except (requests.exceptions.RequestException, ValueError) as e:
+                stats['failed'] += 1
+                print(f"\nError fetching friends for {steam_id}: {e}")
+                results[steam_id] = None
+            
+            time.sleep(delay)
+            print_progress()
+            
+        return results
+
+    def process_level(ids_to_process: List[str], current_depth: int, visited: Set[str]) -> Set[str]:
+        """Process one level of the friend network."""
+        if current_depth > max_depth:
+            return set()
+
+        # Save the current batch of IDs
+        new_ids = [id for id in ids_to_process if id not in visited]
+        if new_ids:
+            save_to_csv(new_ids, current_depth)
+            visited.update(new_ids)
+
+        next_level_ids = set()
+        
+        # Process IDs in batches
+        for i in range(0, len(ids_to_process), batch_size):
+            batch = ids_to_process[i:i + batch_size]
+            print(f"\nDepth {current_depth}: Processing batch of {len(batch)} IDs")
+            
+            results = get_friends_batch(batch)
+            
+            for steam_id, friends in results.items():
+                if friends is not None:
+                    friend_ids = {friend["steamid"] for friend in friends}
+                    next_level_ids.update(friend_ids - visited)
+
+        return next_level_ids
+
+    visited_ids = set()
+    
+    # Create output directory if it doesn't exist
+    output_path = Path(output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Initialize CSV file with headers
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['steam_id', 'depth', 'timestamp'])
+    
+    print(f"Starting crawl at {stats['start_time'].strftime('%H:%M:%S')}")
+    print(f"Max depth: {max_depth} | Delay between requests: {delay}s | Batch size: {batch_size}")
+    print(f"Saving results to: {output_file}")
+    
+    try:
+        current_level = initial_steam_ids
+        for depth in range(1, max_depth + 1):
+            next_level = process_level(current_level, depth, visited_ids)
+            if not next_level:
+                break
+            current_level = list(next_level)
+            
+    except KeyboardInterrupt:
+        print("\nCrawl interrupted by user")
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
+    finally:
+        end_time = datetime.now()
+        total_time = (end_time - stats['start_time']).total_seconds()
+        
+        print(f"\n\nCrawl ended at {end_time.strftime('%H:%M:%S')}")
+        print(f"Total time: {total_time:.1f} seconds")
+        print(f"Profiles processed successfully: {stats['processed']}")
+        print(f"Private profiles encountered: {stats['private']}")
+        print(f"Failed requests (other errors): {stats['failed']}")
+        print(f"Unique Steam IDs found: {len(visited_ids)}")
+        print(f"Results saved to: {output_file}")
+    
+    return visited_ids
+
+# Example usage
+if __name__ == "__main__":
+    API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    INITIAL_STEAM_IDS = ["??????????", "??????????"]  # List of initial Steam IDs
+    
+    # Collect unique Steam IDs with a 1-second delay between requests and max depth of 2
+    unique_steam_ids = get_friends_recursive(
+        API_KEY, 
+        INITIAL_STEAM_IDS,
+        output_file="steam_friends.csv",
+        delay=1.0, 
+        max_depth=2,
+        batch_size=100  # Process up to 100 IDs at a time
+    )
