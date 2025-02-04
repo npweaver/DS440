@@ -1,15 +1,19 @@
 import requests
 import time
+import csv
 from typing import Set, Optional
 from datetime import datetime
+from pathlib import Path
 
-def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.0, max_depth: int = 2) -> Set[str]:
+def get_friends_recursive(api_key: str, initial_steam_id: str, output_file: str = "steam_friends.csv", 
+                         delay: float = 1.0, max_depth: int = 2) -> Set[str]:
     """
-    Recursively collect unique Steam IDs from a user's friend network.
+    Recursively collect unique Steam IDs from a user's friend network and save to CSV.
     
     Args:
         api_key: Steam Web API key
         initial_steam_id: Starting user's Steam ID
+        output_file: Path to CSV file for saving results
         delay: Delay between API calls in seconds to avoid rate limiting
         max_depth: Maximum depth of recursion to prevent excessive API calls
         
@@ -30,6 +34,13 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
         print(f"\rProcessed: {stats['processed']} | Private: {stats['private']} | "
               f"Failed: {stats['failed']} | Total Found: {len(visited_ids)} | "
               f"Time: {elapsed_time:.1f}s", end='')
+
+    def save_to_csv(steam_id: str, depth: int):
+        """Save a single Steam ID to the CSV file."""
+        timestamp = datetime.now().isoformat()
+        with open(output_file, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([steam_id, depth, timestamp])
 
     def get_friends(steam_id: str) -> Optional[list]:
         """Helper function to make the API call for a single user."""
@@ -79,6 +90,7 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
             return
         
         visited.add(steam_id)
+        save_to_csv(steam_id, current_depth)  # Save each new ID as we find it
         print(f"\nDepth {current_depth}: Processing {steam_id}")
         
         friends = get_friends(steam_id)
@@ -93,23 +105,37 @@ def get_friends_recursive(api_key: str, initial_steam_id: str, delay: float = 1.
                 crawl(friend_id, current_depth + 1, visited)
     
     visited_ids = set()
+    
+    # Create output directory if it doesn't exist
+    output_path = Path(output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Initialize CSV file with headers
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['steam_id', 'depth', 'timestamp'])
+    
     print(f"Starting crawl at {stats['start_time'].strftime('%H:%M:%S')}")
     print(f"Max depth: {max_depth} | Delay between requests: {delay}s")
+    print(f"Saving results to: {output_file}")
     
     try:
         crawl(initial_steam_id, 1, visited_ids)
     except KeyboardInterrupt:
         print("\nCrawl interrupted by user")
-    
-    end_time = datetime.now()
-    total_time = (end_time - stats['start_time']).total_seconds()
-    
-    print(f"\n\nCrawl completed at {end_time.strftime('%H:%M:%S')}")
-    print(f"Total time: {total_time:.1f} seconds")
-    print(f"Profiles processed successfully: {stats['processed']}")
-    print(f"Private profiles encountered: {stats['private']}")
-    print(f"Failed requests (other errors): {stats['failed']}")
-    print(f"Unique Steam IDs found: {len(visited_ids)}")
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
+    finally:
+        end_time = datetime.now()
+        total_time = (end_time - stats['start_time']).total_seconds()
+        
+        print(f"\n\nCrawl ended at {end_time.strftime('%H:%M:%S')}")
+        print(f"Total time: {total_time:.1f} seconds")
+        print(f"Profiles processed successfully: {stats['processed']}")
+        print(f"Private profiles encountered: {stats['private']}")
+        print(f"Failed requests (other errors): {stats['failed']}")
+        print(f"Unique Steam IDs found: {len(visited_ids)}")
+        print(f"Results saved to: {output_file}")
     
     return visited_ids
 
@@ -119,8 +145,10 @@ if __name__ == "__main__":
     INITIAL_STEAM_ID = "??????????"
     
     # Collect unique Steam IDs with a 1-second delay between requests and max depth of 2
-    unique_steam_ids = get_friends_recursive(API_KEY, INITIAL_STEAM_ID, delay=1.0, max_depth=2)
-    
-    print("\nFound Steam IDs:")
-    for steam_id in unique_steam_ids:
-        print(steam_id)
+    unique_steam_ids = get_friends_recursive(
+        API_KEY, 
+        INITIAL_STEAM_ID,
+        output_file="steam_friends.csv",
+        delay=1.0, 
+        max_depth=2
+    )
