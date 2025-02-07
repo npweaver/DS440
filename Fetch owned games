@@ -1,0 +1,188 @@
+import pandas as pd
+import asyncio
+import aiohttp
+import time
+import json
+import os
+from typing import Dict, Any, List, Set
+from datetime import datetime
+from aiohttp import ClientTimeout
+from asyncio import Semaphore
+from pathlib import Path
+
+
+class SteamDataFetcher:
+    def __init__(self, api_key: str, checkpoint_dir: str = "checkpoints"):
+        self.api_key = api_key
+        self.checkpoint_dir = checkpoint_dir
+        self.processed_ids: Set[str] = set()
+        self.failed_ids: Set[str] = set()
+        Path(checkpoint_dir).mkdir(exist_ok=True)
+
+    def load_checkpoint(self) -> None:
+        """Load previously processed IDs from checkpoint."""
+        checkpoint_file = Path(self.checkpoint_dir) / "processed_ids.json"
+        failed_file = Path(self.checkpoint_dir) / "failed_ids.json"
+
+        if checkpoint_file.exists():
+            with open(checkpoint_file, 'r') as f:
+                self.processed_ids = set(json.load(f))
+        if failed_file.exists():
+            with open(failed_file, 'r') as f:
+                self.failed_ids = set(json.load(f))
+
+    def save_checkpoint(self) -> None:
+        """Save processed IDs to checkpoint."""
+        checkpoint_file = Path(self.checkpoint_dir) / "processed_ids.json"
+        failed_file = Path(self.checkpoint_dir) / "failed_ids.json"
+
+        with open(checkpoint_file, 'w') as f:
+            json.dump(list(self.processed_ids), f)
+        with open(failed_file, 'w') as f:
+            json.dump(list(self.failed_ids), f)
+
+    async def fetch_owned_games(self, session: aiohttp.ClientSession, steam_id: str, semaphore: Semaphore) -> Dict[
+        str, Any]:
+        """Fetch owned games data with retry logic."""
+        max_retries = 3
+        base_url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
+        params = {
+            'key': self.api_key,
+            'steamid': steam_id,
+            'format': 'json',
+            'include_appinfo': 1,
+            'include_played_free_games': 1
+        }
+
+        for attempt in range(max_retries):
+            async with semaphore:
+                try:
+                    async with session.get(base_url, params=params) as response:
+                        if response.status == 200:
+                            return await response.json(), steam_id
+                        elif response.status == 429:  # Rate limit
+                            wait_time = 5 * (attempt + 1)
+                            print(f"Rate limited for Steam ID {steam_id}. Waiting {wait_time}s...")
+                            await asyncio.sleep(wait_time)
+                            continue
+                        else:
+                            print(f"Error {response.status} for Steam ID {steam_id}")
+                            break
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed for Steam ID {steam_id}: {str(e)}")
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(2 ** attempt)
+                        continue
+                    break
+
+        self.failed_ids.add(steam_id)
+        return None, steam_id
+
+    async def process_chunk(self, steam_ids: List[str], output_file: str, max_concurrent: int = 5):
+        """Process a chunk of Steam IDs and save results."""
+        timeout = ClientTimeout(total=30)
+        chunk_data = []
+        semaphore = Semaphore(max_concurrent)
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            tasks = [
+                self.fetch_owned_games(session, steam_id, semaphore)
+                for steam_id in steam_ids
+                if steam_id not in self.processed_ids
+            ]
+
+            for completed_task in asyncio.as_completed(tasks):
+                response, steam_id = await completed_task
+                if response:
+                    games_data = self.process_games_data(response, steam_id)
+                    chunk_data.extend(games_data)
+                    self.processed_ids.add(steam_id)
+
+                    # Save progress every 100 processed IDs
+                    if len(chunk_data) % 100 == 0:
+                        self.save_partial_results(chunk_data, output_file)
+                        self.save_checkpoint()
+
+        # Save remaining results
+        self.save_partial_results(chunk_data, output_file)
+        self.save_checkpoint()
+        return chunk_data
+
+    @staticmethod
+    def process_games_data(api_response: Dict[str, Any], steam_id: str) -> list:
+        """Process API response into game records."""
+        if not api_response or 'response' not in api_response:
+            return []
+
+        games_data = []
+        response_data = api_response['response']
+
+        if 'games' not in response_data:
+            return []
+
+        for game in response_data['games']:
+            game_record = {
+                'steam_id': steam_id,
+                'app_id': game.get('appid'),
+                'game_name': game.get('name', ''),
+                'playtime_2weeks': game.get('playtime_2weeks', 0),
+                'playtime_forever': game.get('playtime_forever', 0),
+                'img_icon_url': game.get('img_icon_url', ''),
+                'img_logo_url': game.get('img_logo_url', ''),
+                'has_community_visible_stats': game.get('has_community_visible_stats', False)
+            }
+            games_data.append(game_record)
+
+        return games_data
+
+    @staticmethod
+    def save_partial_results(data: List[dict], output_file: str) -> None:
+        """Save partial results to CSV file."""
+        if not data:
+            return
+
+        df = pd.DataFrame(data)
+        mode = 'a' if os.path.exists(output_file) else 'w'
+        header = not os.path.exists(output_file)
+        df.to_csv(output_file, mode=mode, header=header, index=False)
+
+
+async def main_async(input_file: str, output_file: str, api_key: str, chunk_size: int = 1000):
+    """Main async function to process Steam IDs in chunks."""
+    fetcher = SteamDataFetcher(api_key)
+    fetcher.load_checkpoint()
+
+    # Read input CSV in chunks to handle large files
+    chunks = pd.read_csv(input_file, chunksize=chunk_size)
+
+    for i, chunk in enumerate(chunks):
+        steam_ids = chunk['steam_id'].astype(str).tolist()
+        print(f"Processing chunk {i + 1}, IDs {i * chunk_size} to {(i + 1) * chunk_size}")
+
+        start_time = time.time()
+        await fetcher.process_chunk(steam_ids, output_file, max_concurrent=1)
+        end_time = time.time()
+
+        print(f"Chunk {i + 1} completed in {end_time - start_time:.2f} seconds")
+        print(f"Processed: {len(fetcher.processed_ids)}, Failed: {len(fetcher.failed_ids)}")
+
+        # Optional delay between chunks
+        await asyncio.sleep(1)
+
+
+def main(input_file: str, output_file: str, api_key: str, chunk_size: int = 1000):
+    """Synchronous entry point."""
+    start_time = time.time()
+    asyncio.run(main_async(input_file, output_file, api_key, chunk_size))
+    end_time = time.time()
+
+    print(f"Total processing time: {end_time - start_time:.2f} seconds")
+
+
+if __name__ == "__main__":
+    API_KEY = "XXXXXXXXXXXXXXXXXXXX"
+    INPUT_FILE = "unique_steam_ids.csv"
+    OUTPUT_FILE = "steam_games_data.csv"
+    CHUNK_SIZE = 1000
+
+    main(INPUT_FILE, OUTPUT_FILE, API_KEY, CHUNK_SIZE)
