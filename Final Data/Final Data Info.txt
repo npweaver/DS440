@@ -1,0 +1,1 @@
+This folder contains about 4000 games with clean and usable data, as well as 2000 users and their owned games with the same stats.
