@@ -1,369 +1,797 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import MultiLabelBinarizer, MinMaxScaler
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.model_selection import train_test_split
+import re
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import mean_squared_error
+import warnings
 
-# Load datasets
-user_data = pd.read_csv('final_steam_user_data.csv')
-games_data = pd.read_csv('final_cleaned_games.csv')
+warnings.filterwarnings('ignore')
 
-# Print column names to verify
-print("User data columns:", user_data.columns.tolist())
-print("Games data columns:", games_data.columns.tolist())
+print("Loading and preprocessing data...")
 
-# Handle column name discrepancies
-# Rename columns if needed to ensure consistency
-if 'appid' in games_data.columns and 'app_id' not in games_data.columns:
-    games_data = games_data.rename(columns={'appid': 'app_id'})
-    print("Renamed 'appid' to 'app_id' in games_data")
+# Load the dataset
+df = pd.read_csv('final_steam_user_data.csv')
 
-# Examine the first few rows to understand the data
-print("\nUser data sample:")
-print(user_data.head())
-print("\nGames data sample:")
-print(games_data.head())
+# Basic information about the dataset
+print(f"Dataset shape: {df.shape}")
+print(f"Number of unique users: {df['steam_id'].nunique()}")
+print(f"Number of unique games: {df['app_id'].nunique()}")
 
-# Create a user-item matrix where rows are users and columns are games
-print("\nCreating user-item matrix...")
-# This creates a matrix where each cell indicates if a user owns a game (1) or not (0)
-user_game_matrix = user_data.pivot_table(
+
+# Clean and preprocess the data
+def clean_owners(owners_str):
+    """Convert owners range to the average number."""
+    if pd.isnull(owners_str) or owners_str == "":
+        return 0
+    # Extract numbers from strings like "5,000,000 .. 10,000,000"
+    numbers = re.findall(r'[\d,]+', owners_str)
+    if len(numbers) == 2:
+        # Convert to integers, removing commas
+        low = int(numbers[0].replace(',', ''))
+        high = int(numbers[1].replace(',', ''))
+        return (low + high) / 2
+    return 0
+
+
+def parse_list_field(field_str):
+    """Parse comma-separated fields into lists."""
+    if pd.isnull(field_str) or field_str == "":
+        return []
+    return [item.strip() for item in field_str.split(',')]
+
+
+# Clean the dataset
+print("Cleaning and preprocessing the data...")
+df['owners_count'] = df['owners'].apply(clean_owners)
+df['tags_list'] = df['tags'].apply(parse_list_field)
+df['genres_list'] = df['genre'].apply(parse_list_field)
+df['languages_list'] = df['languages'].apply(parse_list_field)
+
+# Create a user-game interaction matrix based on playtime
+print("Creating user-game interaction matrix...")
+# We'll use average_forever as our interaction strength
+user_game_matrix = df.pivot_table(
     index='steam_id',
     columns='app_id',
-    values='name',  # Using 'name' as a placeholder; we only care if a value exists
-    aggfunc=lambda x: 1,  # Set to 1 if the user owns the game
-    fill_value=0  # 0 if they don't own it
+    values='average_forever',
+    fill_value=0
 )
 
-# Print the shape of the matrix
-print(f"Matrix shape: {user_game_matrix.shape}")
-
-# Convert to sparse matrix for efficiency (many cells will be 0)
+# Convert sparse matrix for memory efficiency
 user_game_sparse = csr_matrix(user_game_matrix.values)
 
-# Initialize the model
-model_knn = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=20)
-model_knn.fit(user_game_sparse)
+print(f"User-game matrix shape: {user_game_matrix.shape}")
+
+# --- CONTENT-BASED FILTERING ---
+print("\nBuilding content-based filtering model...")
+
+# Create game features from tags, genres, developer, publisher
+# First, let's create a dataframe with unique games
+games_df = df.drop_duplicates('app_id')[
+    ['app_id', 'name', 'developer', 'publisher', 'tags_list', 'genres_list', 'price']]
+games_df = games_df.dropna(subset=['name'])
+# One-hot encode tags
+mlb = MultiLabelBinarizer()
+tags_encoded = mlb.fit_transform(games_df['tags_list'])
+tags_df = pd.DataFrame(tags_encoded, columns=mlb.classes_)
+
+# One-hot encode genres
+genres_encoded = mlb.fit_transform(games_df['genres_list'])
+genres_df = pd.DataFrame(genres_encoded, columns=mlb.classes_)
+
+# One-hot encode developer and publisher
+dev_encoded = pd.get_dummies(games_df['developer'], prefix='dev')
+pub_encoded = pd.get_dummies(games_df['publisher'], prefix='pub')
+
+# Combine all features
+game_features = pd.concat([tags_df, genres_df, dev_encoded, pub_encoded], axis=1)
+
+# Ensure all DataFrames have the same indices
+# Reset index to make sure we maintain the correct ordering
+games_df = games_df.reset_index(drop=True)
+game_features = game_features.reset_index(drop=True)
+
+# Fill NaN values with 0 in game_features
+game_features = game_features.fillna(0)
+
+# Normalize price
+scaler = MinMaxScaler()
+games_df['price_scaled'] = scaler.fit_transform(games_df[['price']].fillna(0))
+
+# Add price to game features, ensuring matching indices
+game_features = game_features.loc[games_df.index]  # Match indices
+game_features['price'] = games_df['price_scaled']
+
+# Final check to ensure no NaN values
+game_features = game_features.fillna(0)
+print(f"NaN values in game_features: {game_features.isna().sum().sum()}")
+
+print(f"Game features shape: {game_features.shape}")
+
+# Calculate content-based similarity
+print("Computing content similarity matrix (this may take some time)...")
+
+# Instead of using sparse matrix which is causing data type issues,
+# we'll compute similarity directly but with memory optimization
+# First, convert to numeric type explicitly
+game_features = game_features.astype(float)
 
 
-def get_game_recommendations(user_id, n_recommendations=10):
-    """
-    Get game recommendations for a specific user
+# If the feature matrix is too large, we can use batch processing
+# to compute cosine similarity
+def compute_cosine_similarity_in_batches(matrix, batch_size=1000):
+    n_samples = matrix.shape[0]
+    sim_matrix = np.zeros((n_samples, n_samples))
 
-    Parameters:
-    -----------
-    user_id : int
-        The steam_id of the user
-    n_recommendations : int
-        Number of recommendations to return
+    for i in range(0, n_samples, batch_size):
+        batch_end = min(i + batch_size, n_samples)
+        batch = matrix[i:batch_end]
 
-    Returns:
-    --------
-    DataFrame containing recommended games
-    """
-    # Check if user exists in our data
+        # Compute similarities for this batch
+        batch_sim = cosine_similarity(batch, matrix)
+        sim_matrix[i:batch_end] = batch_sim
+
+        # Report progress
+        if i % 5000 == 0:
+            print(f"  Processed {i}/{n_samples} rows")
+
+    return sim_matrix
+
+
+content_sim = compute_cosine_similarity_in_batches(game_features.values)
+print("Content-based similarity matrix computed")
+
+
+# Function to get content-based recommendations
+def get_content_recommendations(game_id, top_n=10):
+    """Get content-based recommendations based on game similarity."""
+    if game_id not in games_df['app_id'].values:
+        return pd.DataFrame()
+
+    # Find the index of the game in our dataframe
+    idx = games_df[games_df['app_id'] == game_id].index[0]
+
+    # Get similarity scores
+    sim_scores = list(enumerate(content_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:top_n + 1]  # Exclude the game itself
+
+    # Get game indices
+    game_indices = [i[0] for i in sim_scores]
+
+    # Return the recommended games with similarity scores
+    recommendations = games_df.iloc[game_indices].copy()
+    recommendations['similarity_score'] = [i[1] for i in sim_scores]
+
+    return recommendations[['app_id', 'name', 'similarity_score']]
+
+
+# --- COLLABORATIVE FILTERING ---
+print("\nBuilding collaborative filtering model...")
+
+# Split data for training and testing
+# First convert to csr_matrix to save memory
+user_game_sparse = csr_matrix(user_game_matrix.values)
+
+# Use a smaller test size to prevent memory issues
+print("Splitting data into training and test sets...")
+train_ratio = 0.8
+test_ratio = 0.2
+
+# Get dimensions
+n_users, n_items = user_game_sparse.shape
+
+# Create masks for train and test
+from scipy import sparse
+import random
+
+# For each user, create train and test sets
+train_matrix = sparse.lil_matrix(user_game_sparse.shape)
+test_matrix = sparse.lil_matrix(user_game_sparse.shape)
+
+for u in range(n_users):
+    # Get indices and data of items this user has interacted with
+    row = user_game_sparse[u]
+    indices = row.nonzero()[1]
+    data = row.data
+
+    # Skip users with no interactions
+    if len(indices) == 0:
+        continue
+
+    # Number of items to move to test
+    n_test = max(1, int(len(indices) * test_ratio))
+
+    # Randomly select items to move to test
+    test_idx = random.sample(range(len(indices)), n_test)
+
+    # Add to train and test matrices
+    for i, idx in enumerate(indices):
+        if i in test_idx:
+            test_matrix[u, idx] = data[i]
+        else:
+            train_matrix[u, idx] = data[i]
+
+# Convert to CSR format for faster operations
+train_matrix = train_matrix.tocsr()
+test_matrix = test_matrix.tocsr()
+
+print(
+    f"Train matrix: {train_matrix.shape}, density: {train_matrix.nnz / (train_matrix.shape[0] * train_matrix.shape[1]):.6f}")
+print(
+    f"Test matrix: {test_matrix.shape}, density: {test_matrix.nnz / (test_matrix.shape[0] * test_matrix.shape[1]):.6f}")
+
+# Train a KNN model
+knn_model = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=20)
+knn_model.fit(train_matrix)
+
+print("KNN model trained for collaborative filtering")
+
+
+# Function to get collaborative filtering recommendations
+def get_collaborative_recommendations(user_id, top_n=10):
+    """Get collaborative filtering recommendations for a user."""
     if user_id not in user_game_matrix.index:
-        return f"User {user_id} not found in the dataset."
+        return pd.DataFrame()
 
     # Find the index of the user
     user_idx = user_game_matrix.index.get_loc(user_id)
 
-    # Get the user's profile
-    user_profile = user_game_sparse[user_idx:user_idx + 1]
+    # Get the user's game interactions
+    user_vector = train_matrix[user_idx:user_idx + 1]
 
     # Find similar users
-    distances, indices = model_knn.kneighbors(user_profile, n_neighbors=n_recommendations + 1)
+    distances, indices = knn_model.kneighbors(user_vector, n_neighbors=10)
 
-    # Get the indices of similar users (skip the first one as it's the user themselves)
-    similar_users_indices = indices.flatten()[1:]
-    similar_users = user_game_matrix.iloc[similar_users_indices]
-
-    # Convert back to user IDs
-    similar_users_ids = user_game_matrix.index[similar_users_indices]
-    print(f"Similar users to {user_id}: {similar_users_ids.tolist()}")
-
-    # Get the games owned by the user
-    user_games = set(user_game_matrix.columns[user_game_matrix.loc[user_id] > 0])
+    # Get the games played by similar users
+    similar_users_indices = indices.flatten()
 
     # Create a dictionary to store game scores
     game_scores = {}
 
-    # Calculate scores for each game
-    for game in user_game_matrix.columns:
-        # Skip games the user already owns
-        if game in user_games:
+    # Iterate through similar users
+    for idx in similar_users_indices:
+        if idx == user_idx:  # Skip the user itself
             continue
 
-        # Calculate a simple score based on how many similar users own the game
-        game_idx = user_game_matrix.columns.get_loc(game)
-        score = similar_users.iloc[:, game_idx].sum()
+        # Get the user's vector
+        user_vec = train_matrix[idx].toarray().flatten()
 
-        if score > 0:
-            game_scores[game] = score
+        # Find games the user has played
+        played_games = np.where(user_vec > 0)[0]
+
+        # Score the games
+        for game_idx in played_games:
+            game_id = user_game_matrix.columns[game_idx]
+
+            # Skip games the target user has already played
+            if user_game_matrix.iloc[user_idx, game_idx] > 0:
+                continue
+
+            # Calculate a score based on similarity and playtime
+            if game_id not in game_scores:
+                game_scores[game_id] = 0
+
+            # Add to the score (inversely weighted by distance)
+            distance_weight = 1 / (1 + distances[0][list(similar_users_indices).index(idx)])
+            game_scores[game_id] += user_vec[game_idx] * distance_weight
 
     # Sort games by score
-    recommended_games = sorted(game_scores.items(), key=lambda x: x[1], reverse=True)[:n_recommendations]
+    sorted_games = sorted(game_scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
 
-    # Get game details
-    recommendations = []
-    for game_id, score in recommended_games:
-        game_info = games_data[games_data['app_id'] == game_id]
-        if not game_info.empty:
-            recommendations.append({
-                'app_id': game_id,
-                'name': game_info['name'].iloc[0] if 'name' in game_info else f"Game {game_id}",
-                'score': score,
-                'similarity_score': score / len(similar_users),  # Normalize score
-                'genre': game_info['genre'].iloc[0] if 'genre' in game_info else "Unknown",
-                'tags': game_info['tags'].iloc[0] if 'tags' in game_info else "Unknown"
-            })
+    # Create a dataframe with the recommended games
+    recommendations = pd.DataFrame(sorted_games, columns=['app_id', 'cf_score'])
 
-    return pd.DataFrame(recommendations) if recommendations else "No recommendations found."
+    # Add game details
+    game_details = games_df[games_df['app_id'].isin(recommendations['app_id'])]
+    recommendations = recommendations.merge(game_details[['app_id', 'name']], on='app_id')
+
+    return recommendations[['app_id', 'name', 'cf_score']]
 
 
-# Function to get content-based recommendations using game tags and genres
-def get_content_based_recommendations(user_id, n_recommendations=10):
-    """
-    Get content-based recommendations based on genres and tags of owned games
+# --- HYBRID RECOMMENDER ---
+print("\nBuilding hybrid recommender system...")
 
-    Parameters:
-    -----------
-    user_id : int
-        The steam_id of the user
-    n_recommendations : int
-        Number of recommendations to return
 
-    Returns:
-    --------
-    DataFrame containing recommended games
-    """
-    # Check if user exists in our data
+def get_hybrid_recommendations(user_id, content_weight=0.4, top_n=10):
+    """Get hybrid recommendations combining collaborative and content-based filtering."""
+    # Get user's play history
     if user_id not in user_game_matrix.index:
-        return f"User {user_id} not found in the dataset."
+        return pd.DataFrame()
 
-    # Get the games owned by the user
-    user_games = user_game_matrix.columns[user_game_matrix.loc[user_id] > 0].tolist()
+    user_history = user_game_matrix.loc[user_id]
+    user_history = user_history[user_history > 0]
 
-    # Get genres and tags of owned games
-    owned_games_info = user_data[(user_data['steam_id'] == user_id) & (user_data['app_id'].isin(user_games))]
-    owned_game_ids = owned_games_info['app_id'].unique()
+    if len(user_history) == 0:
+        return pd.DataFrame()  # No play history
 
-    # Get full game details from games_data
-    user_game_details = games_data[games_data['app_id'].isin(owned_game_ids)]
+    # Get the most played game
+    most_played_game = user_history.idxmax()
 
-    # Extract and combine all tags and genres
-    all_tags = []
-    all_genres = []
+    # Get content-based recommendations based on the most played game
+    content_recs = get_content_recommendations(most_played_game, top_n=top_n * 2)
 
-    for _, game in user_game_details.iterrows():
-        if 'tags' in games_data.columns and isinstance(game.get('tags'), str):
-            all_tags.extend(game['tags'].split(','))
-        if 'genre' in games_data.columns and isinstance(game.get('genre'), str):
-            all_genres.extend(game['genre'].split(','))
-
-    # Count tag and genre occurrences
-    tag_counts = pd.Series(all_tags).value_counts()
-    genre_counts = pd.Series(all_genres).value_counts()
-
-    # Get the top tags and genres
-    top_tags = tag_counts.index[:min(10, len(tag_counts))].tolist() if not tag_counts.empty else []
-    top_genres = genre_counts.index[:min(5, len(genre_counts))].tolist() if not genre_counts.empty else []
-
-    print(f"User's top genres: {top_genres}")
-    print(f"User's top tags: {top_tags[:5] if len(top_tags) >= 5 else top_tags}")
-
-    # Score all games based on tag and genre similarity
-    game_scores = {}
-
-    for _, game in games_data.iterrows():
-        game_id = game['app_id']
-
-        # Skip games the user already owns
-        if game_id in owned_game_ids:
-            continue
-
-        score = 0
-        # Score based on genres
-        if 'genre' in games_data.columns and isinstance(game.get('genre'), str):
-            game_genres = game['genre'].split(',')
-            genre_match = sum(genre in top_genres for genre in game_genres)
-            score += genre_match * 2  # Weight genres more heavily
-
-        # Score based on tags
-        if 'tags' in games_data.columns and isinstance(game.get('tags'), str):
-            game_tags = game['tags'].split(',')
-            tag_match = sum(tag in top_tags for tag in game_tags)
-            score += tag_match
-
-        if score > 0:
-            game_scores[game_id] = score
-
-    # Sort games by score
-    recommended_games = sorted(game_scores.items(), key=lambda x: x[1], reverse=True)[:n_recommendations]
-
-    # Get game details
-    recommendations = []
-    for game_id, score in recommended_games:
-        game_info = games_data[games_data['app_id'] == game_id]
-        if not game_info.empty:
-            recommendations.append({
-                'app_id': game_id,
-                'name': game_info['name'].iloc[0] if 'name' in game_info else f"Game {game_id}",
-                'score': score,
-                'genre': game_info['genre'].iloc[0] if 'genre' in game_info else "Unknown",
-                'tags': game_info['tags'].iloc[0] if 'tags' in game_info else "Unknown"
-            })
-
-    return pd.DataFrame(recommendations) if recommendations else "No content-based recommendations found."
-
-
-# Function to combine both recommendation approaches
-def hybrid_recommendations(user_id, n_recommendations=10):
-    """
-    Combine collaborative filtering and content-based recommendations
-
-    Parameters:
-    -----------
-    user_id : int
-        The steam_id of the user
-    n_recommendations : int
-        Number of recommendations to return
-
-    Returns:
-    --------
-    DataFrame containing recommended games
-    """
     # Get collaborative filtering recommendations
-    cf_recommendations = get_game_recommendations(user_id, n_recommendations)
+    collab_recs = get_collaborative_recommendations(user_id, top_n=top_n * 2)
 
-    # Get content-based recommendations
-    cb_recommendations = get_content_based_recommendations(user_id, n_recommendations)
-
-    # If either recommendation system failed or returned a string, return the other
-    if isinstance(cf_recommendations, str):
-        return cb_recommendations if not isinstance(cb_recommendations, str) else "No recommendations available."
-    if isinstance(cb_recommendations, str):
-        return cf_recommendations
-
-    # If both are empty DataFrames
-    if cf_recommendations.empty and cb_recommendations.empty:
-        return "No recommendations available."
-
-    # If one is empty, return the other
-    if cf_recommendations.empty:
-        return cb_recommendations
-    if cb_recommendations.empty:
-        return cf_recommendations
-
-    # Combine scores from both methods
-    cf_recommendations = cf_recommendations.set_index('app_id')
-    cb_recommendations = cb_recommendations.set_index('app_id')
+    # If we couldn't get recommendations from one method, return the other
+    if content_recs.empty:
+        return collab_recs.head(top_n)
+    if collab_recs.empty:
+        return content_recs.head(top_n)
 
     # Normalize scores for each method
-    if not cf_recommendations.empty and 'score' in cf_recommendations.columns:
-        cf_recommendations['norm_score'] = cf_recommendations['score'] / cf_recommendations['score'].max() if \
-        cf_recommendations['score'].max() > 0 else 0
-    if not cb_recommendations.empty and 'score' in cb_recommendations.columns:
-        cb_recommendations['norm_score'] = cb_recommendations['score'] / cb_recommendations['score'].max() if \
-        cb_recommendations['score'].max() > 0 else 0
+    content_recs['norm_score'] = content_recs['similarity_score'] / content_recs['similarity_score'].max()
+    collab_recs['norm_score'] = collab_recs['cf_score'] / collab_recs['cf_score'].max()
 
-    # Combine recommendations
-    all_app_ids = set(cf_recommendations.index) | set(cb_recommendations.index)
+    # Combine the recommendations
+    # First, get all unique game IDs
+    all_games = set(content_recs['app_id']).union(set(collab_recs['app_id']))
 
-    # Create the combined DataFrame
-    combined_recommendations = []
+    # Create a dictionary to store hybrid scores
+    hybrid_scores = {}
 
-    for app_id in all_app_ids:
-        # Calculate hybrid score
-        cf_score = cf_recommendations.loc[
-            app_id, 'norm_score'] if app_id in cf_recommendations.index and 'norm_score' in cf_recommendations.columns else 0
-        cb_score = cb_recommendations.loc[
-            app_id, 'norm_score'] if app_id in cb_recommendations.index and 'norm_score' in cb_recommendations.columns else 0
+    for game_id in all_games:
+        # Initialize scores
+        content_score = 0
+        collab_score = 0
 
-        # Weight collaborative filtering slightly more (0.6 vs 0.4)
-        hybrid_score = (0.6 * cf_score) + (0.4 * cb_score)
+        # Get content-based score if available
+        content_game = content_recs[content_recs['app_id'] == game_id]
+        if not content_game.empty:
+            content_score = content_game['norm_score'].values[0]
 
-        # Get game details
-        game_df = cf_recommendations.loc[[app_id]] if app_id in cf_recommendations.index else cb_recommendations.loc[
-            [app_id]]
+        # Get collaborative filtering score if available
+        collab_game = collab_recs[collab_recs['app_id'] == game_id]
+        if not collab_game.empty:
+            collab_score = collab_game['norm_score'].values[0]
 
-        game_info = {
-            'app_id': app_id,
-            'name': games_data[games_data['app_id'] == app_id]['name'].iloc[0] if not games_data[
-                games_data['app_id'] == app_id].empty and 'name' in games_data.columns else f"Game {app_id}",
-            'hybrid_score': hybrid_score,
-            'cf_score': cf_score,
-            'cb_score': cb_score
-        }
+        # Calculate weighted hybrid score
+        hybrid_score = (content_weight * content_score) + ((1 - content_weight) * collab_score)
 
-        # Add genre and tags if available
-        if 'genre' in game_df.columns:
-            game_info['genre'] = game_df['genre'].iloc[0]
-        if 'tags' in game_df.columns:
-            game_info['tags'] = game_df['tags'].iloc[0]
+        # Skip games the user has already played
+        if game_id in user_history.index:
+            continue
 
-        combined_recommendations.append(game_info)
+        # Add to hybrid scores
+        hybrid_scores[game_id] = hybrid_score
 
-    # Convert to DataFrame and sort by hybrid score
-    recommendations_df = pd.DataFrame(combined_recommendations)
-    if not recommendations_df.empty:
-        recommendations_df = recommendations_df.sort_values('hybrid_score', ascending=False).head(n_recommendations)
+    # Sort and get top recommendations
+    sorted_hybrid = sorted(hybrid_scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
 
-    return recommendations_df.reset_index(
-        drop=True) if not recommendations_df.empty else "No hybrid recommendations available."
+    # Create a dataframe
+    hybrid_recs = pd.DataFrame(sorted_hybrid, columns=['app_id', 'hybrid_score'])
+
+    # Add game details
+    game_details = games_df[games_df['app_id'].isin(hybrid_recs['app_id'])]
+    hybrid_recs = hybrid_recs.merge(game_details[['app_id', 'name']], on='app_id')
+
+    return hybrid_recs[['app_id', 'name', 'hybrid_score']]
 
 
-# Demo: How to use the recommender system
-if __name__ == "__main__":
-    # Let's find a user with a reasonable number of games
-    user_game_counts = user_data.groupby('steam_id').size()
-    users_with_many_games = user_game_counts[user_game_counts > 10].index[:5]
+# --- NEW EVALUATION METRICS USING SIMILARITY SCORES ---
+print("\nImplementing similarity-based evaluation metrics...")
 
-    print(f"\nTop users with many games: {users_with_many_games.tolist()}")
 
-    # Select the first user from the list for demonstration
-    if len(users_with_many_games) > 0:
-        demo_user_id = users_with_many_games[0]
+def evaluate_recommender_by_similarity(test_data, game_features, user_game_matrix, top_n=10):
+    """
+    Evaluate recommender system using similarity between recommended items and test items.
 
-        print(f"\n--- DEMO FOR USER {demo_user_id} ---")
+    Args:
+        test_data: DataFrame with test data
+        game_features: DataFrame with game features for calculating similarity
+        user_game_matrix: Original user-game interaction matrix
+        top_n: Number of recommendations to generate
 
-        try:
-            # Get collaborative filtering recommendations
-            print("\nCollaborative filtering recommendations:")
-            cf_recs = get_game_recommendations(demo_user_id)
-            if isinstance(cf_recs, pd.DataFrame) and not cf_recs.empty:
-                selected_columns = [col for col in ['name', 'similarity_score', 'genre'] if col in cf_recs.columns]
-                print(cf_recs[selected_columns])
-            else:
-                print(cf_recs)
+    Returns:
+        avg_similarity: Average similarity score between recommended and actual games
+        coverage: Percentage of users for whom recommendations could be generated
+        diversity: Average pairwise dissimilarity of recommendations
+    """
+    # Select a sample of users for evaluation
+    test_users = np.random.choice(test_data.index.unique(),
+                                  min(100, len(test_data.index.unique())),
+                                  replace=False)
 
-            # Get content-based recommendations
-            print("\nContent-based recommendations:")
-            cb_recs = get_content_based_recommendations(demo_user_id)
-            if isinstance(cb_recs, pd.DataFrame) and not cb_recs.empty:
-                selected_columns = [col for col in ['name', 'score', 'genre'] if col in cb_recs.columns]
-                print(cb_recs[selected_columns])
-            else:
-                print(cb_recs)
+    # Initialize metrics
+    all_similarities = []
+    user_coverage = 0
+    diversity_scores = []
 
-            # Get hybrid recommendations
-            print("\nHybrid recommendations:")
-            hybrid_recs = hybrid_recommendations(demo_user_id)
-            if isinstance(hybrid_recs, pd.DataFrame) and not hybrid_recs.empty:
-                selected_columns = [col for col in ['name', 'hybrid_score', 'cf_score', 'cb_score', 'genre'] if
-                                    col in hybrid_recs.columns]
-                print(hybrid_recs[selected_columns])
-            else:
-                print(hybrid_recs)
+    for user_id in test_users:
+        # Get the user's actual games from test data
+        user_test = test_data.loc[user_id]
+        actual_games = user_test[user_test > 0].index.tolist()
 
-            # Show owned games for reference
-            user_owned_games = user_data[user_data['steam_id'] == demo_user_id]
-            print(f"\nUser owns {len(user_owned_games)} games, including:")
-            print(user_owned_games['name'].head(10).tolist())
+        if not actual_games:
+            continue
 
-        except Exception as e:
-            print(f"Error in recommendation process: {e}")
-            import traceback
+        # Get hybrid recommendations
+        recommendations = get_hybrid_recommendations(user_id, top_n=top_n)
 
-            traceback.print_exc()
-    else:
-        print("No users with enough games found for a demo.")
+        if recommendations.empty:
+            continue
+
+        user_coverage += 1
+        recommended_games = recommendations['app_id'].tolist()
+
+        # Calculate similarity between recommended games and actual games
+        # First, get feature vectors for actual games
+        actual_game_indices = [games_df[games_df['app_id'] == game].index[0]
+                               for game in actual_games
+                               if game in games_df['app_id'].values]
+
+        if not actual_game_indices:
+            continue
+
+        actual_features = game_features.iloc[actual_game_indices].values
+
+        # Get feature vectors for recommended games
+        rec_game_indices = [games_df[games_df['app_id'] == game].index[0]
+                            for game in recommended_games
+                            if game in games_df['app_id'].values]
+
+        if not rec_game_indices:
+            continue
+
+        rec_features = game_features.iloc[rec_game_indices].values
+
+        # Calculate the average similarity between each recommended game and the closest actual game
+        game_similarities = []
+        for rec_feature in rec_features:
+            # Reshape for cosine_similarity function
+            reshaped_rec = rec_feature.reshape(1, -1)
+            sim_scores = cosine_similarity(reshaped_rec, actual_features)[0]
+            # Take the highest similarity score (closest match)
+            best_match_score = np.max(sim_scores)
+            game_similarities.append(best_match_score)
+
+        # Average similarity score for this user
+        avg_user_similarity = np.mean(game_similarities)
+        all_similarities.append(avg_user_similarity)
+
+        # Calculate diversity as the average pairwise dissimilarity between recommendations
+        if len(rec_features) > 1:
+            pairwise_sim = cosine_similarity(rec_features)
+            # Set diagonal elements to 0 to exclude self-similarity
+            np.fill_diagonal(pairwise_sim, 0)
+            # Convert similarity to dissimilarity (1 - similarity)
+            pairwise_dissim = 1 - pairwise_sim
+            # Calculate mean dissimilarity
+            diversity_score = np.mean(pairwise_dissim)
+            diversity_scores.append(diversity_score)
+
+    # Calculate overall metrics
+    avg_similarity = np.mean(all_similarities) if all_similarities else 0
+    coverage = user_coverage / len(test_users)
+    avg_diversity = np.mean(diversity_scores) if diversity_scores else 0
+
+    print(f"Average Similarity Score: {avg_similarity:.4f}")
+    print(f"User Coverage: {coverage:.4f}")
+    print(f"Average Diversity: {avg_diversity:.4f}")
+
+    return avg_similarity, coverage, avg_diversity
+
+
+def run_enhanced_evaluation(test_data, game_features, user_game_matrix, top_n=10, similarity_threshold=0.5):
+    """
+    Run both similarity-based and ranking-based evaluation metrics,
+    plus precision, recall, and F1 score with similarity threshold.
+
+    Args:
+        test_data: DataFrame with test data
+        game_features: DataFrame with game features
+        user_game_matrix: Original user-game interaction matrix
+        top_n: Number of recommendations to generate
+        similarity_threshold: Threshold to determine relevance (0-1)
+    """
+    print("\n--- Similarity-Based Evaluation ---")
+    avg_similarity, coverage, diversity = evaluate_recommender_by_similarity(
+        test_data, game_features, user_game_matrix, top_n)
+
+    print(f"\n--- Precision, Recall, F1 Evaluation (Similarity Threshold = {similarity_threshold}) ---")
+    avg_precision, avg_recall, avg_f1 = evaluate_recommender_precision_recall(
+        test_data, user_game_matrix, game_features, k=top_n, similarity_threshold=similarity_threshold)
+
+    # Create a comprehensive report
+    print("\n--- Comprehensive Evaluation Report ---")
+    print(f"Number of recommendations evaluated: {top_n}")
+    print(f"Similarity Score: {avg_similarity:.4f} - How similar recommended games are to user's actual games")
+    print(f"User Coverage: {coverage:.4f} - Fraction of users for whom recommendations could be generated")
+    print(
+        f"Diversity: {diversity:.4f} - How different the recommendations are from each other (higher is more diverse)")
+    print(
+        f"Precision@{top_n} (similarity threshold {similarity_threshold}): {avg_precision:.4f} - Fraction of recommended items that are relevant")
+    print(
+        f"Recall@{top_n} (similarity threshold {similarity_threshold}): {avg_recall:.4f} - Fraction of relevant items that are recommended")
+    print(
+        f"F1@{top_n} (similarity threshold {similarity_threshold}): {avg_f1:.4f} - Harmonic mean of precision and recall")
+
+    # Check if avg_ndcg and avg_mrr are defined - these seem to be missing in your code
+    try:
+        print(f"NDCG: {avg_ndcg:.4f} - How well the system ranks relevant items")
+        print(f"MRR: {avg_mrr:.4f} - Average position of the first relevant recommendation")
+    except NameError:
+        # The variables don't exist, so skip them
+        print("Note: NDCG and MRR metrics were not calculated")
+
+    return {
+        'similarity': avg_similarity,
+        'coverage': coverage,
+        'diversity': diversity,
+        'precision': avg_precision,
+        'recall': avg_recall,
+        'f1': avg_f1,
+        'similarity_threshold': similarity_threshold
+    }
+
+
+def analyze_test_data(test_data, user_game_matrix):
+    """Analyze test data to understand potential issues."""
+    # Count number of users with test data
+    users_with_test = sum(1 for user_id in test_data.index if test_data.loc[user_id].max() > 0)
+
+    # Count average number of games per user in test set
+    games_per_user = [len(test_data.loc[user_id][test_data.loc[user_id] > 0])
+                      for user_id in test_data.index]
+    avg_games = np.mean(games_per_user) if games_per_user else 0
+
+    # Check data types between recommendations and test data
+    sample_user = test_data.index[0]
+    sample_test_game = test_data.loc[sample_user][test_data.loc[sample_user] > 0].index[0] if any(
+        test_data.loc[sample_user] > 0) else None
+
+    if sample_test_game is not None:
+        sample_recs = get_hybrid_recommendations(sample_user, top_n=10)
+        if not sample_recs.empty:
+            sample_rec_game = sample_recs['app_id'].iloc[0]
+            print(f"\nData type analysis:")
+            print(f"Test game ID type: {type(sample_test_game)}")
+            print(f"Recommended game ID type: {type(sample_rec_game)}")
+
+    print(f"\nTest Data Analysis:")
+    print(f"Users with test data: {users_with_test} out of {len(test_data.index)}")
+    print(f"Average games per user in test set: {avg_games:.2f}")
+    print(f"Test data density: {test_data.values.mean():.6f}")
+
+    # Check for any type conversion issues in game_features
+    print(f"\nGame Features Analysis:")
+    print(f"game_features data types: {game_features.dtypes.value_counts().to_dict()}")
+    print(f"NaN values in game_features: {game_features.isna().sum().sum()}")
+    print(f"Game features shape: {game_features.shape}")
+
+# Create test data from the test matrix
+print("Converting test matrix to dataframe...")
+# Since we're keeping the same shape as the original user_game_matrix
+# we need to convert sparse matrix to dense array for dataframe
+test_data = pd.DataFrame(
+    test_matrix.toarray(),
+    index=user_game_matrix.index,
+    columns=user_game_matrix.columns
+)
+print(f"Test data shape: {test_data.shape}")
+
+
+def calculate_precision_recall_f1_at_k(recommendations, actual_items, k=10):
+    """
+    Calculate precision, recall, and F1 score at K for recommendations.
+
+    Args:
+        recommendations: List of recommended item IDs
+        actual_items: List of actual item IDs from test data
+        k: Number of recommendations to consider
+
+    Returns:
+        precision: Precision@K score
+        recall: Recall@K score
+        f1: F1@K score
+    """
+    # Consider only top-K recommendations
+    if len(recommendations) > k:
+        recommendations = recommendations[:k]
+
+    # Calculate number of relevant items
+    n_rel_and_rec = len(set(recommendations) & set(actual_items))
+
+    if len(recommendations) == 0:
+        return 0, 0, 0
+
+    # Calculate precision and recall
+    precision = n_rel_and_rec / len(recommendations)
+    recall = n_rel_and_rec / len(actual_items) if len(actual_items) > 0 else 0
+
+    # Calculate F1 score
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+    return precision, recall, f1
+
+
+def calculate_precision_recall_f1_at_k_with_similarity(recommendations, actual_items, game_features,
+                                                       similarity_threshold=0.5, k=10):
+    """
+    Calculate precision, recall, and F1 score at K for recommendations using similarity threshold.
+
+    Args:
+        recommendations: List of recommended item IDs
+        actual_items: List of actual item IDs from test data
+        game_features: DataFrame with game features for calculating similarity
+        similarity_threshold: Threshold to determine relevance (0-1)
+        k: Number of recommendations to consider
+
+    Returns:
+        precision: Precision@K score
+        recall: Recall@K score
+        f1: F1@K score
+    """
+    # Consider only top-K recommendations
+    if len(recommendations) > k:
+        recommendations = recommendations[:k]
+
+    if len(recommendations) == 0 or len(actual_items) == 0:
+        return 0, 0, 0
+
+    # Get feature vectors for recommended games
+    rec_game_indices = [games_df[games_df['app_id'] == game].index[0]
+                        for game in recommendations
+                        if game in games_df['app_id'].values]
+
+    # Get feature vectors for actual games
+    actual_game_indices = [games_df[games_df['app_id'] == game].index[0]
+                           for game in actual_items
+                           if game in games_df['app_id'].values]
+
+    if not rec_game_indices or not actual_game_indices:
+        return 0, 0, 0
+
+    rec_features = game_features.iloc[rec_game_indices].values
+    actual_features = game_features.iloc[actual_game_indices].values
+
+    # Count relevant recommendations (those with similarity > threshold to any actual game)
+    relevant_recs = 0
+    for rec_feature in rec_features:
+        reshaped_rec = rec_feature.reshape(1, -1)
+        sim_scores = cosine_similarity(reshaped_rec, actual_features)[0]
+        if np.max(sim_scores) >= similarity_threshold:
+            relevant_recs += 1
+
+    # Count relevant actual items (those with similarity > threshold to any recommendation)
+    relevant_actuals = 0
+    for actual_feature in actual_features:
+        reshaped_actual = actual_feature.reshape(1, -1)
+        sim_scores = cosine_similarity(reshaped_actual, rec_features)[0]
+        if np.max(sim_scores) >= similarity_threshold:
+            relevant_actuals += 1
+
+    # Calculate precision and recall
+    precision = relevant_recs / len(rec_features) if len(rec_features) > 0 else 0
+    recall = relevant_actuals / len(actual_features) if len(actual_features) > 0 else 0
+
+    # Calculate F1 score
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+    return precision, recall, f1
+
+
+def evaluate_recommender_precision_recall(test_data, user_game_matrix, game_features, k=10, num_users=100,
+                                          similarity_threshold=0.5):
+    """
+    Evaluate recommender system using precision, recall, and F1 at K with similarity threshold.
+
+    Args:
+        test_data: DataFrame with test data
+        user_game_matrix: Original user-game interaction matrix
+        game_features: DataFrame with game features for calculating similarity
+        k: Number of recommendations to consider
+        num_users: Number of users to sample for evaluation
+        similarity_threshold: Threshold to determine relevance (0-1)
+
+    Returns:
+        avg_precision: Average precision@K score
+        avg_recall: Average recall@K score
+        avg_f1: Average F1@K score
+    """
+    # Select a sample of users for evaluation
+    test_users = np.random.choice(test_data.index.unique(),
+                                  min(num_users, len(test_data.index.unique())),
+                                  replace=False)
+
+    # Initialize metrics
+    precision_scores = []
+    recall_scores = []
+    f1_scores = []
+
+    for user_id in test_users:
+        # Get the user's actual games from test data
+        user_test = test_data.loc[user_id]
+        actual_games = user_test[user_test > 0].index.tolist()
+
+        if not actual_games:
+            continue
+
+        # Get hybrid recommendations
+        recommendations = get_hybrid_recommendations(user_id, top_n=k)
+
+        if recommendations.empty:
+            continue
+
+        recommended_games = recommendations['app_id'].tolist()
+
+        # Calculate precision, recall, and F1 with similarity threshold
+        precision, recall, f1 = calculate_precision_recall_f1_at_k_with_similarity(
+            recommended_games, actual_games, game_features, similarity_threshold, k)
+
+        precision_scores.append(precision)
+        recall_scores.append(recall)
+        f1_scores.append(f1)
+
+    # Calculate average metrics
+    avg_precision = np.mean(precision_scores) if precision_scores else 0
+    avg_recall = np.mean(recall_scores) if recall_scores else 0
+    avg_f1 = np.mean(f1_scores) if f1_scores else 0
+
+    print(f"Precision@{k} (similarity threshold {similarity_threshold}): {avg_precision:.4f}")
+    print(f"Recall@{k} (similarity threshold {similarity_threshold}): {avg_recall:.4f}")
+    print(f"F1@{k} (similarity threshold {similarity_threshold}): {avg_f1:.4f}")
+
+    return avg_precision, avg_recall, avg_f1
+
+
+# --- RUN BOTH EVALUATION APPROACHES ---
+
+print("\n--- Running Enhanced Evaluation (Similarity-based) ---")
+try:
+    evaluation_results = run_enhanced_evaluation(test_data, game_features, user_game_matrix)
+except Exception as e:
+    print(f"Error during enhanced evaluation: {e}")
+    evaluation_results = None
+
+def get_valid_sample_game():
+    """Get a valid sample game with a non-null name."""
+    for i in range(len(games_df)):
+        game_id = games_df['app_id'].iloc[i]
+        game_name = games_df['name'].iloc[i]
+        if pd.notna(game_name) and pd.notna(game_id):
+            return game_id, game_name
+    return None, None
+
+# Then replace the example usage code with:
+print("\nExample recommendations:")
+
+# Get recommendations for a sample user
+sample_user_id = user_game_matrix.index[0]
+hybrid_recommendations = get_hybrid_recommendations(sample_user_id, top_n=10)
+print(f"\nHybrid recommendations for user {sample_user_id}:")
+print(hybrid_recommendations)
+
+# Get content-based recommendations for a sample game with valid name
+sample_game_id, sample_game_name = get_valid_sample_game()
+if sample_game_id is not None:
+    content_recommendations = get_content_recommendations(sample_game_id, top_n=10)
+    print(f"\nContent-based recommendations for game {sample_game_name} (ID: {sample_game_id}):")
+    print(content_recommendations)
+else:
+    print("\nCouldn't find a valid sample game for content-based recommendations.")
+
+# --- EXAMPLE USAGE ---
+print("\nExample recommendations:")
+
+# Get recommendations for a sample user
+sample_user_id = user_game_matrix.index[0]
+hybrid_recommendations = get_hybrid_recommendations(sample_user_id, top_n=10)
+print(f"\nHybrid recommendations for user {sample_user_id}:")
+print(hybrid_recommendations)
+
+# Get content-based recommendations for a sample game
+sample_game_id = games_df['app_id'].iloc[0]
+sample_game_name = games_df['name'].iloc[0]
+content_recommendations = get_content_recommendations(sample_game_id, top_n=10)
+print(f"\nContent-based recommendations for game {sample_game_name} (ID: {sample_game_id}):")
+print(content_recommendations)
+evaluation_results = run_enhanced_evaluation(test_data, game_features, user_game_matrix, top_n=10, similarity_threshold=0.5)
+print("\nRecommender system implementation complete!")
