@@ -513,14 +513,6 @@ def run_enhanced_evaluation(test_data, game_features, user_game_matrix, top_n=10
     print(
         f"F1@{top_n} (similarity threshold {similarity_threshold}): {avg_f1:.4f} - Harmonic mean of precision and recall")
 
-    # Check if avg_ndcg and avg_mrr are defined - these seem to be missing in your code
-    try:
-        print(f"NDCG: {avg_ndcg:.4f} - How well the system ranks relevant items")
-        print(f"MRR: {avg_mrr:.4f} - Average position of the first relevant recommendation")
-    except NameError:
-        # The variables don't exist, so skip them
-        print("Note: NDCG and MRR metrics were not calculated")
-
     return {
         'similarity': avg_similarity,
         'coverage': coverage,
