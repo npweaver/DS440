@@ -1,0 +1,898 @@
+C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Scripts\python.exe "C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Steam Project.py" 
+2025-04-17 04:30:18.375907: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-17 04:30:18.890557: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Loading and preprocessing data...
+Dataset shape: (2852503, 18)
+Number of unique users: 2000
+Number of unique games: 24424
+Cleaning and preprocessing the data...
+Creating user-game interaction matrix...
+User-game matrix shape: (2000, 24420)
+
+Building content-based filtering model...
+NaN values in game_features: 0
+Game features shape: (22828, 24519)
+Computing content similarity matrix (this may take some time)...
+  Processed 0/22828 rows
+  Processed 5000/22828 rows
+  Processed 10000/22828 rows
+  Processed 15000/22828 rows
+  Processed 20000/22828 rows
+Content-based similarity matrix computed
+
+Building collaborative filtering model...
+Splitting data into training and test sets...
+Train matrix: (2000, 24420), density: 0.006691
+Test matrix: (2000, 24420), density: 0.001654
+KNN model trained for collaborative filtering
+
+Building hybrid recommender system...
+
+Aligning game features with game data...
+Game features shape after alignment: (22828, 24519)
+
+Aligning game features with game data...
+Game features shape after alignment: (22828, 24519)
+
+Initializing Two-Tower Recommender System...
+Building model architecture...
+Configuring model parameters...
+2025-04-17 04:35:07.072631: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:From C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:219: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+Preparing training data...
+Starting data preparation...
+Encoding users and games...
+Encoded 2000 users and 24420 games
+Creating game ID to feature mapping...
+Created mapping for 22826 games
+
+Sample of game ID mappings:
+Game ID: 6060, Feature Index: 0
+Game ID: 8930, Feature Index: 1
+Game ID: 92100, Feature Index: 2
+Game ID: 105600, Feature Index: 3
+Game ID: 220200, Feature Index: 4
+Number of available games for sampling: 22826
+
+Collecting user-game interactions...
+
+Detailed processing of first batch:
+
+Processing user 1/10 (ID: 76561197960820070)
+User has 297 played games
+Valid positive games: 279
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Processed 30 positive interactions for user
+Processed 40 positive interactions for user
+Processed 50 positive interactions for user
+Processed 60 positive interactions for user
+Processed 70 positive interactions for user
+Processed 80 positive interactions for user
+Processed 90 positive interactions for user
+Processed 100 positive interactions for user
+Processed 110 positive interactions for user
+Processed 120 positive interactions for user
+Processed 130 positive interactions for user
+Processed 140 positive interactions for user
+Processed 150 positive interactions for user
+Processed 160 positive interactions for user
+Processed 170 positive interactions for user
+Processed 180 positive interactions for user
+Processed 190 positive interactions for user
+Processed 200 positive interactions for user
+Processed 210 positive interactions for user
+Processed 220 positive interactions for user
+Processed 230 positive interactions for user
+Processed 240 positive interactions for user
+Processed 250 positive interactions for user
+Processed 260 positive interactions for user
+Processed 270 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 1. Current totals: +279 -10
+
+Processing user 2/10 (ID: 76561197961220721)
+User has 484 played games
+Valid positive games: 461
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Processed 30 positive interactions for user
+Processed 40 positive interactions for user
+Processed 50 positive interactions for user
+Processed 60 positive interactions for user
+Processed 70 positive interactions for user
+Processed 80 positive interactions for user
+Processed 90 positive interactions for user
+Processed 100 positive interactions for user
+Processed 110 positive interactions for user
+Processed 120 positive interactions for user
+Processed 130 positive interactions for user
+Processed 140 positive interactions for user
+Processed 150 positive interactions for user
+Processed 160 positive interactions for user
+Processed 170 positive interactions for user
+Processed 180 positive interactions for user
+Processed 190 positive interactions for user
+Processed 200 positive interactions for user
+Processed 210 positive interactions for user
+Processed 220 positive interactions for user
+Processed 230 positive interactions for user
+Processed 240 positive interactions for user
+Processed 250 positive interactions for user
+Processed 260 positive interactions for user
+Processed 270 positive interactions for user
+Processed 280 positive interactions for user
+Processed 290 positive interactions for user
+Processed 300 positive interactions for user
+Processed 310 positive interactions for user
+Processed 320 positive interactions for user
+Processed 330 positive interactions for user
+Processed 340 positive interactions for user
+Processed 350 positive interactions for user
+Processed 360 positive interactions for user
+Processed 370 positive interactions for user
+Processed 380 positive interactions for user
+Processed 390 positive interactions for user
+Processed 400 positive interactions for user
+Processed 410 positive interactions for user
+Processed 420 positive interactions for user
+Processed 430 positive interactions for user
+Processed 440 positive interactions for user
+Processed 450 positive interactions for user
+Processed 460 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 2. Current totals: +740 -20
+
+Processing user 3/10 (ID: 76561197961234271)
+User has 8 played games
+Valid positive games: 8
+Sampling 8 negative interactions
+Added 8 negative interactions for user
+Completed user 3. Current totals: +748 -28
+
+Processing user 4/10 (ID: 76561197962161542)
+User has 17 played games
+Valid positive games: 16
+Processed 10 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 4. Current totals: +764 -38
+
+Processing user 5/10 (ID: 76561197963174852)
+User has 323 played games
+Valid positive games: 309
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Processed 30 positive interactions for user
+Processed 40 positive interactions for user
+Processed 50 positive interactions for user
+Processed 60 positive interactions for user
+Processed 70 positive interactions for user
+Processed 80 positive interactions for user
+Processed 90 positive interactions for user
+Processed 100 positive interactions for user
+Processed 110 positive interactions for user
+Processed 120 positive interactions for user
+Processed 130 positive interactions for user
+Processed 140 positive interactions for user
+Processed 150 positive interactions for user
+Processed 160 positive interactions for user
+Processed 170 positive interactions for user
+Processed 180 positive interactions for user
+Processed 190 positive interactions for user
+Processed 200 positive interactions for user
+Processed 210 positive interactions for user
+Processed 220 positive interactions for user
+Processed 230 positive interactions for user
+Processed 240 positive interactions for user
+Processed 250 positive interactions for user
+Processed 260 positive interactions for user
+Processed 270 positive interactions for user
+Processed 280 positive interactions for user
+Processed 290 positive interactions for user
+Processed 300 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 5. Current totals: +1073 -48
+
+Processing user 6/10 (ID: 76561197963823749)
+User has 71 played games
+Valid positive games: 67
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Processed 30 positive interactions for user
+Processed 40 positive interactions for user
+Processed 50 positive interactions for user
+Processed 60 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 6. Current totals: +1140 -58
+
+Processing user 7/10 (ID: 76561197964301959)
+User has 15 played games
+Valid positive games: 15
+Processed 10 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 7. Current totals: +1155 -68
+
+Processing user 8/10 (ID: 76561197964920021)
+User has 15 played games
+Valid positive games: 15
+Processed 10 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 8. Current totals: +1170 -78
+
+Processing user 9/10 (ID: 76561197965641400)
+User has 233 played games
+Valid positive games: 224
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Processed 30 positive interactions for user
+Processed 40 positive interactions for user
+Processed 50 positive interactions for user
+Processed 60 positive interactions for user
+Processed 70 positive interactions for user
+Processed 80 positive interactions for user
+Processed 90 positive interactions for user
+Processed 100 positive interactions for user
+Processed 110 positive interactions for user
+Processed 120 positive interactions for user
+Processed 130 positive interactions for user
+Processed 140 positive interactions for user
+Processed 150 positive interactions for user
+Processed 160 positive interactions for user
+Processed 170 positive interactions for user
+Processed 180 positive interactions for user
+Processed 190 positive interactions for user
+Processed 200 positive interactions for user
+Processed 210 positive interactions for user
+Processed 220 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 9. Current totals: +1394 -88
+
+Processing user 10/10 (ID: 76561197966574848)
+User has 25 played games
+Valid positive games: 24
+Processed 10 positive interactions for user
+Processed 20 positive interactions for user
+Sampling 10 negative interactions
+Added 10 negative interactions for user
+Completed user 10. Current totals: +1418 -98
+
+First batch complete. Processing remaining users...
+
+Processing users 10-20 out of 2000
+Current totals: +5273 -198
+
+Processing users 20-30 out of 2000
+Current totals: +7541 -298
+
+Processing users 30-40 out of 2000
+Current totals: +17970 -398
+
+Processing users 40-50 out of 2000
+Current totals: +21595 -498
+
+Processing users 50-60 out of 2000
+Current totals: +25001 -598
+
+Processing users 60-70 out of 2000
+Current totals: +27596 -698
+
+Processing users 70-80 out of 2000
+Current totals: +33766 -798
+
+Processing users 80-90 out of 2000
+Current totals: +37177 -898
+
+Processing users 90-100 out of 2000
+Current totals: +43020 -998
+
+Processing users 100-110 out of 2000
+Current totals: +45603 -1098
+
+Processing users 110-120 out of 2000
+Current totals: +53596 -1191
+
+Processing users 120-130 out of 2000
+Current totals: +58568 -1291
+
+Processing users 130-140 out of 2000
+Current totals: +62536 -1391
+
+Processing users 140-150 out of 2000
+Current totals: +65552 -1491
+
+Processing users 150-160 out of 2000
+Current totals: +70598 -1591
+
+Processing users 160-170 out of 2000
+Current totals: +75263 -1691
+
+Processing users 170-180 out of 2000
+Current totals: +78376 -1791
+
+Processing users 180-190 out of 2000
+Current totals: +81744 -1891
+
+Processing users 190-200 out of 2000
+Current totals: +86322 -1991
+
+Processing users 200-210 out of 2000
+Current totals: +88599 -2091
+
+Processing users 210-220 out of 2000
+Current totals: +90860 -2191
+
+Processing users 220-230 out of 2000
+Current totals: +94127 -2291
+
+Processing users 230-240 out of 2000
+Current totals: +99344 -2391
+
+Processing users 240-250 out of 2000
+Current totals: +101925 -2491
+
+Processing users 250-260 out of 2000
+Current totals: +104428 -2591
+
+Processing users 260-270 out of 2000
+Current totals: +106834 -2691
+
+Processing users 270-280 out of 2000
+Current totals: +112111 -2791
+
+Processing users 280-290 out of 2000
+Current totals: +114274 -2891
+
+Processing users 290-300 out of 2000
+Current totals: +116674 -2986
+
+Processing users 300-310 out of 2000
+Current totals: +120118 -3086
+
+Processing users 310-320 out of 2000
+Current totals: +123072 -3186
+
+Processing users 320-330 out of 2000
+Current totals: +125396 -3286
+
+Processing users 330-340 out of 2000
+Current totals: +127785 -3386
+
+Processing users 340-350 out of 2000
+Current totals: +130531 -3486
+
+Processing users 350-360 out of 2000
+Current totals: +133612 -3586
+
+Processing users 360-370 out of 2000
+Current totals: +135910 -3686
+
+Processing users 370-380 out of 2000
+Current totals: +137324 -3786
+
+Processing users 380-390 out of 2000
+Current totals: +139134 -3886
+
+Processing users 390-400 out of 2000
+Current totals: +142208 -3986
+
+Processing users 400-410 out of 2000
+Current totals: +144954 -4086
+
+Processing users 410-420 out of 2000
+Current totals: +147632 -4186
+
+Processing users 420-430 out of 2000
+Current totals: +151226 -4286
+
+Processing users 430-440 out of 2000
+Current totals: +154609 -4379
+
+Processing users 440-450 out of 2000
+Current totals: +158453 -4472
+
+Processing users 450-460 out of 2000
+Current totals: +159823 -4572
+
+Processing users 460-470 out of 2000
+Current totals: +163000 -4671
+
+Processing users 470-480 out of 2000
+Current totals: +164991 -4771
+
+Processing users 480-490 out of 2000
+Current totals: +167018 -4871
+
+Processing users 490-500 out of 2000
+Current totals: +168452 -4971
+
+Processing users 500-510 out of 2000
+Current totals: +171636 -5071
+
+Processing users 510-520 out of 2000
+Current totals: +173717 -5171
+
+Processing users 520-530 out of 2000
+Current totals: +176664 -5271
+
+Processing users 530-540 out of 2000
+Current totals: +179654 -5371
+
+Processing users 540-550 out of 2000
+Current totals: +182310 -5471
+
+Processing users 550-560 out of 2000
+Current totals: +184253 -5571
+
+Processing users 560-570 out of 2000
+Current totals: +186480 -5671
+
+Processing users 570-580 out of 2000
+Current totals: +188510 -5771
+
+Processing users 580-590 out of 2000
+Current totals: +190053 -5871
+
+Processing users 590-600 out of 2000
+Current totals: +191743 -5971
+
+Processing users 600-610 out of 2000
+Current totals: +193787 -6071
+
+Processing users 610-620 out of 2000
+Current totals: +194713 -6171
+
+Processing users 620-630 out of 2000
+Current totals: +196796 -6271
+
+Processing users 630-640 out of 2000
+Current totals: +198776 -6371
+
+Processing users 640-650 out of 2000
+Current totals: +200572 -6463
+
+Processing users 650-660 out of 2000
+Current totals: +202535 -6563
+
+Processing users 660-670 out of 2000
+Current totals: +204447 -6659
+
+Processing users 670-680 out of 2000
+Current totals: +206093 -6759
+
+Processing users 680-690 out of 2000
+Current totals: +207759 -6859
+
+Processing users 690-700 out of 2000
+Current totals: +209866 -6959
+
+Processing users 700-710 out of 2000
+Current totals: +211592 -7059
+
+Processing users 710-720 out of 2000
+Current totals: +213080 -7150
+
+Processing users 720-730 out of 2000
+Current totals: +214641 -7250
+
+Processing users 730-740 out of 2000
+Current totals: +217561 -7350
+
+Processing users 740-750 out of 2000
+Current totals: +218845 -7450
+
+Processing users 750-760 out of 2000
+Current totals: +223617 -7550
+
+Processing users 760-770 out of 2000
+Current totals: +225943 -7650
+
+Processing users 770-780 out of 2000
+Current totals: +227872 -7750
+
+Processing users 780-790 out of 2000
+Current totals: +229461 -7850
+
+Processing users 790-800 out of 2000
+Current totals: +231324 -7950
+
+Processing users 800-810 out of 2000
+Current totals: +232757 -8044
+
+Processing users 810-820 out of 2000
+Current totals: +234425 -8144
+
+Processing users 820-830 out of 2000
+Current totals: +236396 -8244
+
+Processing users 830-840 out of 2000
+Current totals: +238638 -8344
+
+Processing users 840-850 out of 2000
+Current totals: +240686 -8444
+
+Processing users 850-860 out of 2000
+Current totals: +242241 -8544
+
+Processing users 860-870 out of 2000
+Current totals: +244143 -8644
+
+Processing users 870-880 out of 2000
+Current totals: +245848 -8744
+
+Processing users 880-890 out of 2000
+Current totals: +247261 -8844
+
+Processing users 890-900 out of 2000
+Current totals: +248930 -8944
+
+Processing users 900-910 out of 2000
+Current totals: +250317 -9044
+
+Processing users 910-920 out of 2000
+Current totals: +251738 -9144
+
+Processing users 920-930 out of 2000
+Current totals: +254591 -9244
+
+Processing users 930-940 out of 2000
+Current totals: +256425 -9344
+
+Processing users 940-950 out of 2000
+Current totals: +258065 -9444
+
+Processing users 950-960 out of 2000
+Current totals: +259325 -9537
+
+Processing users 960-970 out of 2000
+Current totals: +260591 -9632
+
+Processing users 970-980 out of 2000
+Current totals: +262414 -9731
+
+Processing users 980-990 out of 2000
+Current totals: +264009 -9831
+
+Processing users 990-1000 out of 2000
+Current totals: +265554 -9931
+
+Processing users 1000-1010 out of 2000
+Current totals: +267097 -10031
+
+Processing users 1010-1020 out of 2000
+Current totals: +268416 -10131
+
+Processing users 1020-1030 out of 2000
+Current totals: +269714 -10226
+
+Processing users 1030-1040 out of 2000
+Current totals: +270872 -10326
+
+Processing users 1040-1050 out of 2000
+Current totals: +272381 -10426
+
+Processing users 1050-1060 out of 2000
+Current totals: +273993 -10526
+
+Processing users 1060-1070 out of 2000
+Current totals: +274903 -10626
+
+Processing users 1070-1080 out of 2000
+Current totals: +276295 -10726
+
+Processing users 1080-1090 out of 2000
+Current totals: +279358 -10826
+
+Processing users 1090-1100 out of 2000
+Current totals: +280418 -10926
+
+Processing users 1100-1110 out of 2000
+Current totals: +282018 -11026
+
+Processing users 1110-1120 out of 2000
+Current totals: +283198 -11125
+
+Processing users 1120-1130 out of 2000
+Current totals: +284752 -11225
+
+Processing users 1130-1140 out of 2000
+Current totals: +285938 -11319
+
+Processing users 1140-1150 out of 2000
+Current totals: +287222 -11416
+
+Processing users 1150-1160 out of 2000
+Current totals: +288907 -11516
+
+Processing users 1160-1170 out of 2000
+Current totals: +290366 -11616
+
+Processing users 1170-1180 out of 2000
+Current totals: +291623 -11716
+
+Processing users 1180-1190 out of 2000
+Current totals: +293117 -11816
+
+Processing users 1190-1200 out of 2000
+Current totals: +294775 -11916
+
+Processing users 1200-1210 out of 2000
+Current totals: +297530 -12008
+
+Processing users 1210-1220 out of 2000
+Current totals: +300435 -12107
+
+Processing users 1220-1230 out of 2000
+Current totals: +301431 -12207
+
+Processing users 1230-1240 out of 2000
+Current totals: +302848 -12307
+
+Processing users 1240-1250 out of 2000
+Current totals: +303753 -12407
+
+Processing users 1250-1260 out of 2000
+Current totals: +305054 -12507
+
+Processing users 1260-1270 out of 2000
+Current totals: +305840 -12607
+
+Processing users 1270-1280 out of 2000
+Current totals: +306785 -12701
+
+Processing users 1280-1290 out of 2000
+Current totals: +307727 -12801
+
+Processing users 1290-1300 out of 2000
+Current totals: +309262 -12901
+
+Processing users 1300-1310 out of 2000
+Current totals: +310693 -12993
+
+Processing users 1310-1320 out of 2000
+Current totals: +311976 -13093
+
+Processing users 1320-1330 out of 2000
+Current totals: +313111 -13188
+
+Processing users 1330-1340 out of 2000
+Current totals: +314610 -13288
+
+Processing users 1340-1350 out of 2000
+Current totals: +316053 -13388
+
+Processing users 1350-1360 out of 2000
+Current totals: +317639 -13480
+
+Processing users 1360-1370 out of 2000
+Current totals: +318680 -13580
+
+Processing users 1370-1380 out of 2000
+Current totals: +319889 -13671
+
+Processing users 1380-1390 out of 2000
+Current totals: +320949 -13766
+
+Processing users 1390-1400 out of 2000
+Current totals: +321688 -13866
+
+Processing users 1400-1410 out of 2000
+Current totals: +322997 -13966
+
+Processing users 1410-1420 out of 2000
+Current totals: +323670 -14066
+
+Processing users 1420-1430 out of 2000
+Current totals: +325910 -14166
+
+Processing users 1430-1440 out of 2000
+Current totals: +329711 -14266
+
+Processing users 1440-1450 out of 2000
+Current totals: +330709 -14362
+
+Processing users 1450-1460 out of 2000
+Current totals: +331308 -14453
+
+Processing users 1460-1470 out of 2000
+Current totals: +332231 -14544
+
+Processing users 1470-1480 out of 2000
+Current totals: +332820 -14644
+
+Processing users 1480-1490 out of 2000
+Current totals: +334083 -14739
+
+Processing users 1490-1500 out of 2000
+Current totals: +334591 -14835
+
+Processing users 1500-1510 out of 2000
+Current totals: +335785 -14931
+
+Processing users 1510-1520 out of 2000
+Current totals: +336512 -15023
+
+Processing users 1520-1530 out of 2000
+Current totals: +337207 -15123
+
+Processing users 1530-1540 out of 2000
+Current totals: +338689 -15217
+
+Processing users 1540-1550 out of 2000
+Current totals: +339659 -15317
+
+Processing users 1550-1560 out of 2000
+Current totals: +340441 -15405
+
+Processing users 1560-1570 out of 2000
+Current totals: +341050 -15504
+
+Processing users 1570-1580 out of 2000
+Current totals: +342180 -15604
+
+Processing users 1580-1590 out of 2000
+Current totals: +343266 -15704
+
+Processing users 1590-1600 out of 2000
+Current totals: +347725 -15795
+
+Processing users 1600-1610 out of 2000
+Current totals: +348655 -15894
+
+Processing users 1610-1620 out of 2000
+Current totals: +349162 -15972
+
+Processing users 1620-1630 out of 2000
+Current totals: +350119 -16072
+
+Processing users 1630-1640 out of 2000
+Current totals: +351198 -16165
+
+Processing users 1640-1650 out of 2000
+Current totals: +352028 -16265
+
+Processing users 1650-1660 out of 2000
+Current totals: +353453 -16349
+
+Processing users 1660-1670 out of 2000
+Current totals: +354368 -16446
+
+Processing users 1670-1680 out of 2000
+Current totals: +355041 -16546
+
+Processing users 1680-1690 out of 2000
+Current totals: +355537 -16629
+
+Processing users 1690-1700 out of 2000
+Current totals: +356573 -16729
+
+Processing users 1700-1710 out of 2000
+Current totals: +357218 -16829
+
+Processing users 1710-1720 out of 2000
+Current totals: +358094 -16929
+
+Processing users 1720-1730 out of 2000
+Current totals: +359519 -17029
+
+Processing users 1730-1740 out of 2000
+Current totals: +359945 -17128
+
+Processing users 1740-1750 out of 2000
+Current totals: +362111 -17228
+
+Processing users 1750-1760 out of 2000
+Current totals: +362561 -17316
+
+Processing users 1760-1770 out of 2000
+Current totals: +363341 -17416
+
+Processing users 1770-1780 out of 2000
+Current totals: +364253 -17516
+
+Processing users 1780-1790 out of 2000
+Current totals: +365249 -17616
+
+Processing users 1790-1800 out of 2000
+Current totals: +366423 -17716
+
+Processing users 1800-1810 out of 2000
+Current totals: +367311 -17807
+
+Processing users 1810-1820 out of 2000
+Current totals: +368354 -17886
+
+Processing users 1820-1830 out of 2000
+Current totals: +368864 -17968
+
+Processing users 1830-1840 out of 2000
+Current totals: +369826 -18068
+
+Processing users 1840-1850 out of 2000
+Current totals: +371194 -18168
+
+Processing users 1850-1860 out of 2000
+Current totals: +371929 -18268
+
+Processing users 1860-1870 out of 2000
+Current totals: +372477 -18368
+
+Processing users 1870-1880 out of 2000
+Current totals: +373468 -18465
+
+Processing users 1880-1890 out of 2000
+Current totals: +374184 -18556
+
+Processing users 1890-1900 out of 2000
+Current totals: +374814 -18656
+
+Processing users 1900-1910 out of 2000
+Current totals: +375659 -18755
+
+Processing users 1910-1920 out of 2000
+Current totals: +375957 -18843
+
+Processing users 1920-1930 out of 2000
+Current totals: +376408 -18931
+
+Processing users 1930-1940 out of 2000
+Current totals: +376951 -19024
+
+Processing users 1940-1950 out of 2000
+Current totals: +377527 -19112
+
+Processing users 1950-1960 out of 2000
+Current totals: +377999 -19210
+
+Processing users 1960-1970 out of 2000
+Current totals: +378699 -19307
+
+Processing users 1970-1980 out of 2000
+Current totals: +379156 -19406
+
+Processing users 1980-1990 out of 2000
+Current totals: +379766 -19482
+
+Processing users 1990-2000 out of 2000
+Current totals: +379880 -19536
+
+Interaction collection complete!
+Final counts: +379880 -19536
+
+Finalizing dataset...
+Total interactions: 399416
+Shuffling and splitting data...
+Data preparation complete!
+Training data prepared: 399416 samples
+
+Starting model training...
+
+Training Two-Tower Model...
+Epoch 1/5
+4993/4993 ━━━━━━━━━━━━━━━━━━━━ 48s 9ms/step - accuracy: 0.9476 - loss: 0.3630 - val_accuracy: 0.9596 - val_loss: 0.3522
+Epoch 2/5
+4993/4993 ━━━━━━━━━━━━━━━━━━━━ 39s 8ms/step - accuracy: 0.9681 - loss: 0.3443 - val_accuracy: 0.9655 - val_loss: 0.3474
+Epoch 3/5
+4993/4993 ━━━━━━━━━━━━━━━━━━━━ 39s 8ms/step - accuracy: 0.9732 - loss: 0.3397 - val_accuracy: 0.9607 - val_loss: 0.3521
+Epoch 4/5
+4993/4993 ━━━━━━━━━━━━━━━━━━━━ 39s 8ms/step - accuracy: 0.9747 - loss: 0.3380 - val_accuracy: 0.9623 - val_loss: 0.3510
+Epoch 5/5
+4993/4993 ━━━━━━━━━━━━━━━━━━━━ 40s 8ms/step - accuracy: 0.9750 - loss: 0.3379 - val_accuracy: 0.9620 - val_loss: 0.3500
+
+Comparing recommender systems...
+Traceback (most recent call last):
+  File "C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Steam Project.py", line 894, in <module>
+    hybrid_metrics, combined_metrics = compare_recommender_systems(test_data, num_users=100)
+                                                                   ^^^^^^^^^
+NameError: name 'test_data' is not defined. Did you mean: 'test_ratio'?
+
+Process finished with exit code 1
