@@ -1,6 +1,6 @@
 C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Scripts\python.exe "C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Steam Project.py" 
-2025-04-17 14:17:10.866359: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
-2025-04-17 14:17:11.888135: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-23 21:18:40.604536: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-23 21:18:41.109690: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
 Loading and preprocessing data...
 Dataset shape: (2852503, 18)
 Number of unique users: 2000
@@ -37,7 +37,7 @@ Game features shape after alignment: (22828, 24519)
 Initializing Two-Tower Recommender System...
 Building model architecture...
 Configuring model parameters...
-2025-04-17 14:22:25.989172: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2025-04-23 21:23:26.671817: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
 To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
 WARNING:tensorflow:From C:\Users\nickp\PycharmProjects\pythonProject1\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:219: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
 
@@ -53,29 +53,15 @@ Created mapping for 22826 games
 Number of available games for sampling: 22826
 
 Collecting user-game interactions...
-Processing users 0/2000
-Processing users 100/2000
-Processing users 200/2000
-Processing users 300/2000
-Processing users 400/2000
-Processing users 500/2000
-Processing users 600/2000
-Processing users 700/2000
-Processing users 800/2000
-Processing users 900/2000
-Processing users 1000/2000
-  Batch 10: loss=0.3946, accuracy=0.9440
-Processing users 1100/2000
-Processing users 1200/2000
-Processing users 1300/2000
-Processing users 1400/2000
-Processing users 1500/2000
-Processing users 1600/2000
-Processing users 1700/2000
-Processing users 1800/2000
-Processing users 1900/2000
-Total interactions collected: 399416
-Epoch 1/5 - loss: 0.4354 - accuracy: 0.8054 - val_loss: 0.4733 - val_accuracy: 0.8446
+Pre-processing users 0/2000
+Pre-processing users 1000/2000
+Pre-processed 2000 users with positive interactions
+Processing users batch 500/2000
+Processing users batch 1000/2000
+Processing users batch 1500/2000
+Processing users batch 2000/2000
+Total users processed: 2000
+Epoch 1/5 - loss: 0.5508 - accuracy: 0.4562 - val_loss: 0.4874 - val_accuracy: 0.8652
 Epoch 2/5
 Starting data preparation...
 Encoding users and games...
@@ -85,29 +71,15 @@ Created mapping for 22826 games
 Number of available games for sampling: 22826
 
 Collecting user-game interactions...
-Processing users 0/2000
-Processing users 100/2000
-Processing users 200/2000
-Processing users 300/2000
-Processing users 400/2000
-Processing users 500/2000
-Processing users 600/2000
-Processing users 700/2000
-Processing users 800/2000
-Processing users 900/2000
-Processing users 1000/2000
-  Batch 10: loss=0.3780, accuracy=0.9440
-Processing users 1100/2000
-Processing users 1200/2000
-Processing users 1300/2000
-Processing users 1400/2000
-Processing users 1500/2000
-Processing users 1600/2000
-Processing users 1700/2000
-Processing users 1800/2000
-Processing users 1900/2000
-Total interactions collected: 399416
-Epoch 2/5 - loss: 0.3791 - accuracy: 0.9446 - val_loss: 0.4705 - val_accuracy: 0.8446
+Pre-processing users 0/2000
+Pre-processing users 1000/2000
+Pre-processed 2000 users with positive interactions
+Processing users batch 500/2000
+Processing users batch 1000/2000
+Processing users batch 1500/2000
+Processing users batch 2000/2000
+Total users processed: 2000
+Epoch 2/5 - loss: 0.4136 - accuracy: 0.9447 - val_loss: 0.4647 - val_accuracy: 0.8652
 Epoch 3/5
 Starting data preparation...
 Encoding users and games...
@@ -117,29 +89,15 @@ Created mapping for 22826 games
 Number of available games for sampling: 22826
 
 Collecting user-game interactions...
-Processing users 0/2000
-Processing users 100/2000
-Processing users 200/2000
-Processing users 300/2000
-Processing users 400/2000
-Processing users 500/2000
-Processing users 600/2000
-Processing users 700/2000
-Processing users 800/2000
-Processing users 900/2000
-Processing users 1000/2000
-  Batch 10: loss=0.3716, accuracy=0.9440
-Processing users 1100/2000
-Processing users 1200/2000
-Processing users 1300/2000
-Processing users 1400/2000
-Processing users 1500/2000
-Processing users 1600/2000
-Processing users 1700/2000
-Processing users 1800/2000
-Processing users 1900/2000
-Total interactions collected: 399416
-Epoch 3/5 - loss: 0.3719 - accuracy: 0.9446 - val_loss: 0.4697 - val_accuracy: 0.8446
+Pre-processing users 0/2000
+Pre-processing users 1000/2000
+Pre-processed 2000 users with positive interactions
+Processing users batch 500/2000
+Processing users batch 1000/2000
+Processing users batch 1500/2000
+Processing users batch 2000/2000
+Total users processed: 2000
+Epoch 3/5 - loss: 0.3888 - accuracy: 0.9447 - val_loss: 0.4576 - val_accuracy: 0.8652
 Epoch 4/5
 Starting data preparation...
 Encoding users and games...
@@ -149,29 +107,15 @@ Created mapping for 22826 games
 Number of available games for sampling: 22826
 
 Collecting user-game interactions...
-Processing users 0/2000
-Processing users 100/2000
-Processing users 200/2000
-Processing users 300/2000
-Processing users 400/2000
-Processing users 500/2000
-Processing users 600/2000
-Processing users 700/2000
-Processing users 800/2000
-Processing users 900/2000
-Processing users 1000/2000
-  Batch 10: loss=0.3706, accuracy=0.9440
-Processing users 1100/2000
-Processing users 1200/2000
-Processing users 1300/2000
-Processing users 1400/2000
-Processing users 1500/2000
-Processing users 1600/2000
-Processing users 1700/2000
-Processing users 1800/2000
-Processing users 1900/2000
-Total interactions collected: 399416
-Epoch 4/5 - loss: 0.3703 - accuracy: 0.9446 - val_loss: 0.4693 - val_accuracy: 0.8446
+Pre-processing users 0/2000
+Pre-processing users 1000/2000
+Pre-processed 2000 users with positive interactions
+Processing users batch 500/2000
+Processing users batch 1000/2000
+Processing users batch 1500/2000
+Processing users batch 2000/2000
+Total users processed: 2000
+Epoch 4/5 - loss: 0.3799 - accuracy: 0.9447 - val_loss: 0.4545 - val_accuracy: 0.8652
 Epoch 5/5
 Starting data preparation...
 Encoding users and games...
@@ -181,135 +125,536 @@ Created mapping for 22826 games
 Number of available games for sampling: 22826
 
 Collecting user-game interactions...
-Processing users 0/2000
-Processing users 100/2000
-Processing users 200/2000
-Processing users 300/2000
-Processing users 400/2000
-Processing users 500/2000
-Processing users 600/2000
-Processing users 700/2000
-Processing users 800/2000
-Processing users 900/2000
-Processing users 1000/2000
-  Batch 10: loss=0.3701, accuracy=0.9440
-Processing users 1100/2000
-Processing users 1200/2000
-Processing users 1300/2000
-Processing users 1400/2000
-Processing users 1500/2000
-Processing users 1600/2000
-Processing users 1700/2000
-Processing users 1800/2000
-Processing users 1900/2000
-Total interactions collected: 399416
-Epoch 5/5 - loss: 0.3698 - accuracy: 0.9446 - val_loss: 0.4690 - val_accuracy: 0.8446
+Pre-processing users 0/2000
+Pre-processing users 1000/2000
+Pre-processed 2000 users with positive interactions
+Processing users batch 500/2000
+Processing users batch 1000/2000
+Processing users batch 1500/2000
+Processing users batch 2000/2000
+Total users processed: 2000
+Epoch 5/5 - loss: 0.3761 - accuracy: 0.9447 - val_loss: 0.4534 - val_accuracy: 0.8652
 
 Creating test data for evaluation...
 Test data shape: (80776, 5)
 Test data density: 0.001654
 
 Comparing recommender systems...
-
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 74ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 988us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 995us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 989us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 998us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 994us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 978us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 969us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step  
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step  
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 957us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 963us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 976us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 984us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 963us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 906us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 925us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 909us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 980us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 935us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 936us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 894us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 945us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 930us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 899us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 918us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 22ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 926us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 891us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 946us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 890us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 905us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 890us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 891us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 896us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 895us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 894us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 917us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 869us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 893us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 916us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 902us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 948us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 906us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 898us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 899us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 886us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 923us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 907us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 940us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 881us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 885us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 928us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 937us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 899us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 919us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 893us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 907us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 899us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 954us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 890us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 934us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 878us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 22ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 886us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 940us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 870us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 931us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 888us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 902us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 901us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 876us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 935us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 922us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 894us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 897us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 887us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 922us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 882us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 859us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 905us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 908us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 938us/step
 Converting test matrix to dataframe...
 Test data shape: (2000, 24420)
 
---- Running Enhanced Evaluation (Similarity-based) ---
+================================================================================
+                              RUNNING COMPREHENSIVE EVALUATION
+================================================================================
 
---- Similarity-Based Evaluation ---
-Average Similarity Score: 0.5026
-User Coverage: 1.0000
-Average Diversity: 0.6081
+Running comprehensive evaluation. This may take some time...
+Evaluating 50 users...
+Processing user 1/50
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 899us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 888us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 918us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 920us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 915us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 879us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 896us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 908us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 881us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 902us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 923us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 898us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 876us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 878us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 913us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 908us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 901us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 891us/step
+Processing user 11/50
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 925us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 917us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 882us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 890us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 891us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 883us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 891us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 897us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 901us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 883us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 884us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 907us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 913us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 883us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+Processing user 21/50
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 916us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 893us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 881us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 911us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 954us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 887us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 898us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 902us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 929us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 946us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 913us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 22ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 924us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 906us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 942us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 910us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 912us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 905us/step
+Processing user 31/50
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 921us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 913us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 909us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 897us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 884us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 894us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 923us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 908us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 907us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 884us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 912us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 21ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 935us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 908us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 923us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 895us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 888us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 889us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 918us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 892us/step
+Processing user 41/50
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 902us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 906us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 870us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 877us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 874us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 906us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 904us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 874us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 919us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 20ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 913us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 905us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 878us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 900us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 918us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 889us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 948us/step
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+714/714 ━━━━━━━━━━━━━━━━━━━━ 1s 901us/step
 
---- Precision, Recall, F1 Evaluation (Similarity Threshold = 0.5) ---
-Precision@10 (similarity threshold 0.5): 0.5550
-Recall@10 (similarity threshold 0.5): 0.2352
-F1@10 (similarity threshold 0.5): 0.2985
+================================================================================
+                              EVALUATION RESULTS
+================================================================================
 
---- Comprehensive Evaluation Report ---
-Number of recommendations evaluated: 10
-Similarity Score: 0.5026 - How similar recommended games are to user's actual games
-User Coverage: 1.0000 - Fraction of users for whom recommendations could be generated
-Diversity: 0.6081 - How different the recommendations are from each other (higher is more diverse)
-Precision@10 (similarity threshold 0.5): 0.5550 - Fraction of recommended items that are relevant
-Recall@10 (similarity threshold 0.5): 0.2352 - Fraction of relevant items that are recommended
-F1@10 (similarity threshold 0.5): 0.2985 - Harmonic mean of precision and recall
+********************************************************************************
+                         BASE RECOMMENDER MODELS
+********************************************************************************
 
-Example recommendations:
+CONTENT-BASED FILTERING METRICS
+-------------------------------
+  Precision : 0.6860
+  Recall    : 0.2438
+  F1        : 0.2958
+  Similarity: 0.5370
+  Diversity : 0.4710
 
-Hybrid recommendations for user 76561197960820070:
-    app_id                    name  hybrid_score
-0   346110   ARK: Survival Evolved      0.600000
-1   386360                  SMITE®      0.527625
-2  1085660               Destiny 2      0.439939
-3  1172470           Apex Legends™      0.407274
-4   230410                Warframe      0.401287
-5   235340             Prime World      0.400000
-6   572520                Dropzone      0.357895
-7   771060             Iron League      0.331256
-8  2399830  ARK: Survival Ascended      0.324326
-9   360620              Spellsworn      0.322581
+COLLABORATIVE FILTERING METRICS
+-------------------------------
+  Precision : 0.3837
+  Recall    : 0.2197
+  F1        : 0.2323
+  Similarity: 0.4426
+  Diversity : 0.7713
 
-Content-based recommendations for game STAR WARS™ Battlefront II (Classic, 2005) (ID: 6060):
-       app_id                                       name  similarity_score
-1169  1058020     STAR WARS™ Battlefront (Classic, 2004)          0.750970
-741      6000              STAR WARS™ Republic Commando™          0.728056
-6934   703320   Hidden & Dangerous 2: Courage Under Fire          0.720118
-6280    15000         Tom Clancy's Rainbow Six Lockdown™          0.690111
-746      6030  STAR WARS™ Jedi Knight II - Jedi Outcast™          0.682560
-6009   212630  Tom Clancy's Ghost Recon: Future Soldier™          0.666706
-268     10190    Call of Duty®: Modern Warfare® 2 (2009)          0.666706
-426     13210                        Unreal Tournament 3          0.666627
-2839   211780                     Conflict Desert Storm™          0.665785
-2852    13540            Tom Clancy's Rainbow Six® Vegas          0.654700
+********************************************************************************
+                         HYBRID RECOMMENDER METRICS
+********************************************************************************
 
-Example recommendations:
+Weights: Content (0.40), Collaborative (0.60)
 
-Hybrid recommendations for user 76561197960820070:
-    app_id                    name  hybrid_score
-0   346110   ARK: Survival Evolved      0.600000
-1   386360                  SMITE®      0.527625
-2  1085660               Destiny 2      0.439939
-3  1172470           Apex Legends™      0.407274
-4   230410                Warframe      0.401287
-5   235340             Prime World      0.400000
-6   572520                Dropzone      0.357895
-7   771060             Iron League      0.331256
-8  2399830  ARK: Survival Ascended      0.324326
-9   360620              Spellsworn      0.322581
+HYBRID RECOMMENDER METRICS
+--------------------------
+  Precision : 0.5720
+  Recall    : 0.2779
+  F1        : 0.3092
+  Similarity: 0.5061
+  Diversity : 0.6134
 
-Content-based recommendations for game STAR WARS™ Battlefront II (Classic, 2005) (ID: 6060):
-       app_id                                       name  similarity_score
-1169  1058020     STAR WARS™ Battlefront (Classic, 2004)          0.750970
-741      6000              STAR WARS™ Republic Commando™          0.728056
-6934   703320   Hidden & Dangerous 2: Courage Under Fire          0.720118
-6280    15000         Tom Clancy's Rainbow Six Lockdown™          0.690111
-746      6030  STAR WARS™ Jedi Knight II - Jedi Outcast™          0.682560
-6009   212630  Tom Clancy's Ghost Recon: Future Soldier™          0.666706
-268     10190    Call of Duty®: Modern Warfare® 2 (2009)          0.666706
-426     13210                        Unreal Tournament 3          0.666627
-2839   211780                     Conflict Desert Storm™          0.665785
-2852    13540            Tom Clancy's Rainbow Six® Vegas          0.654700
+Component Performance Comparison:
+  Content-based better: 41 (82.0%)
+  Collaborative better: 9 (18.0%)
+  Equal performance:    0 (0.0%)
 
---- Similarity-Based Evaluation ---
-Average Similarity Score: 0.5134
-User Coverage: 1.0000
-Average Diversity: 0.6152
+  => Content-based filtering performed better in the Hybrid model
 
---- Precision, Recall, F1 Evaluation (Similarity Threshold = 0.5) ---
-Precision@10 (similarity threshold 0.5): 0.6000
-Recall@10 (similarity threshold 0.5): 0.2572
-F1@10 (similarity threshold 0.5): 0.3270
+********************************************************************************
+                         TWO-TOWER RECOMMENDER METRICS
+********************************************************************************
 
---- Comprehensive Evaluation Report ---
-Number of recommendations evaluated: 10
-Similarity Score: 0.5134 - How similar recommended games are to user's actual games
-User Coverage: 1.0000 - Fraction of users for whom recommendations could be generated
-Diversity: 0.6152 - How different the recommendations are from each other (higher is more diverse)
-Precision@10 (similarity threshold 0.5): 0.6000 - Fraction of recommended items that are relevant
-Recall@10 (similarity threshold 0.5): 0.2572 - Fraction of relevant items that are recommended
-F1@10 (similarity threshold 0.5): 0.3270 - Harmonic mean of precision and recall
+TWO-TOWER RECOMMENDER METRICS
+-----------------------------
+  Precision : 0.2620
+  Recall    : 0.1212
+  F1        : 0.1460
+  Similarity: 0.4071
+  Diversity : 0.7540
 
-Recommender system implementation complete!
+********************************************************************************
+                    COMBINED RECOMMENDER METRICS (FINAL SYSTEM)
+********************************************************************************
+
+Weights: Hybrid (0.60), Two-Tower (0.40)
+
+COMBINED RECOMMENDER METRICS
+----------------------------
+  Precision : 0.3660
+  Recall    : 0.2552
+  F1        : 0.2373
+  Similarity: 0.4409
+  Diversity : 0.7758
+
+Component Performance Comparison:
+  Hybrid better:     42 (84.0%)
+  Two-Tower better:  8 (16.0%)
+  Equal performance: 0 (0.0%)
+
+  => Hybrid recommender performed better in the Combined model
+
+********************************************************************************
+                              OVERALL COMPARISON
+********************************************************************************
+
+Model Comparison:
+Model           | Precision  | Recall     | F1         | Similarity | Diversity 
+--------------------------------------------------------------------------------
+Content-Based   | 0.6860*     | 0.2438      | 0.2958      | 0.5370*     | 0.4710     
+Collaborative   | 0.3837      | 0.2197      | 0.2323      | 0.4426      | 0.7713     
+Hybrid          | 0.5720      | 0.2779*     | 0.3092*     | 0.5061      | 0.6134     
+Two-Tower       | 0.2620      | 0.1212      | 0.1460      | 0.4071      | 0.7540     
+Combined        | 0.3660      | 0.2552      | 0.2373      | 0.4409      | 0.7758*    
+
+Best Performer by Metric:
+  Precision : Content-Based (0.6860)
+  Recall    : Hybrid (0.2779)
+  F1        : Hybrid (0.3092)
+  Similarity: Content-Based (0.5370)
+  Diversity : Combined (0.7758)
+
+Overall Best Model: Content-Based (best in 2/5 metrics)
+
+================================================================================
 
 Process finished with exit code 0
