@@ -587,7 +587,7 @@ class TwoTowerRecommender:
 
         print(f"Total users processed: {processed_users}")
 
-    def train(self, data_generator, validation_split=0.2, batch_size=64, epochs=5):
+    def train(self, data_generator, validation_split=0.2, batch_size=64, epochs=3):
         """Train the model using batched data"""
         # Initialize metrics
         history_metrics = {
@@ -793,7 +793,7 @@ def data_generator():
     return two_tower_model.prepare_data(user_game_matrix, game_features)
 
 print("\nStarting model training...")
-history = two_tower_model.train(data_generator, epochs=5)
+history = two_tower_model.train(data_generator, epochs=3)
 
 # Create combined recommender
 get_combined_recommendations = create_combined_recommender(
@@ -1661,6 +1661,125 @@ results = evaluate_recommender_systems(
     collaborative_weight=0.6,
     hybrid_weight=0.6,
     two_tower_weight=0.4,
-    top_n=10,
-    num_users=50  # You can adjust this based on computation resources
+    top_n=15,
+    num_users=100, # You can adjust this based on computation resources
+    similarity_threshold = 0.3
 )
+
+def interactive_recommendations():
+    """Interactive command-line interface for getting recommendations."""
+    print("\n" + "=" * 80)
+    print(" " * 30 + "RECOMMENDATION SYSTEM")
+    print("=" * 80)
+
+    while True:
+        print("\nEnter a command:")
+        print("1. Get recommendations for a user (format: 'user USER_ID')")
+        print("2. Get similar games (format: 'game GAME_ID')")
+        print("3. Compare recommendation types (format: 'compare USER_ID')")
+        print("4. Exit (format: 'exit')")
+
+        command = input("\n> ").strip().lower()
+
+        if command.startswith("exit"):
+            print("Exiting recommendation system. Goodbye!")
+            break
+
+        elif command.startswith("user "):
+            try:
+                user_id = command.split("user ")[1].strip()
+                if user_id not in user_game_matrix.index:
+                    print(f"User ID '{user_id}' not found. Please try another ID.")
+                    continue
+
+                print(f"\nGenerating recommendations for user {user_id}...")
+                recommendations = get_combined_recommendations(user_id, top_n=10)
+
+                if recommendations.empty:
+                    print("Could not generate recommendations for this user.")
+                else:
+                    print("\nRecommended games:")
+                    for i, (_, row) in enumerate(recommendations.iterrows(), 1):
+                        print(f"{i}. {row['name']} (Score: {row['combined_score']:.4f})")
+
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif command.startswith("game "):
+            try:
+                game_id = int(command.split("game ")[1].strip())
+                if game_id not in games_df['app_id'].values:
+                    print(f"Game ID '{game_id}' not found. Please try another ID.")
+                    continue
+
+                game_name = games_df[games_df['app_id'] == game_id]['name'].values[0]
+                print(f"\nFinding similar games to {game_name} (ID: {game_id})...")
+                similar_games = get_content_recommendations(game_id, top_n=10)
+
+                if similar_games.empty:
+                    print("Could not find similar games.")
+                else:
+                    print("\nSimilar games:")
+                    for i, (_, row) in enumerate(similar_games.iterrows(), 1):
+                        print(f"{i}. {row['name']} (Similarity: {row['similarity_score']:.4f})")
+
+            except ValueError:
+                print("Invalid game ID. Please enter a numeric ID.")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif command.startswith("compare "):
+            try:
+                user_id = command.split("compare ")[1].strip()
+                if user_id not in user_game_matrix.index:
+                    print(f"User ID '{user_id}' not found. Please try another ID.")
+                    continue
+
+                print(f"\nComparing recommendation types for user {user_id}...")
+
+                # Get recommendations from each system
+                content_recs = None
+                collab_recs = get_collaborative_recommendations(user_id, top_n=10)
+                hybrid_recs = get_hybrid_recommendations(user_id, top_n=10)
+                two_tower_recs = two_tower_model.get_recommendations(user_id, game_features, top_n=10)
+                combined_recs = get_combined_recommendations(user_id, top_n=10)
+
+                # Get most played game for content-based
+                user_history = user_game_matrix.loc[user_id]
+                user_history = user_history[user_history > 0]
+                if len(user_history) > 0:
+                    most_played_game = user_history.idxmax()
+                    game_name = games_df[games_df['app_id'] == most_played_game]['name'].values[0]
+                    print(f"\nMost played game: {game_name} (ID: {most_played_game})")
+                    content_recs = get_content_recommendations(most_played_game, top_n=5)
+
+                # Display all recommendations
+                systems = [
+                    ("COLLABORATIVE FILTERING", collab_recs, "cf_score"),
+                    ("CONTENT-BASED", content_recs, "similarity_score"),
+                    ("HYBRID RECOMMENDER", hybrid_recs, "hybrid_score"),
+                    ("TWO-TOWER MODEL", two_tower_recs, "two_tower_score"),
+                    ("COMBINED SYSTEM", combined_recs, "combined_score")
+                ]
+
+                for name, recs, score_col in systems:
+                    print(f"\n{name} RECOMMENDATIONS:")
+                    if recs is None or recs.empty:
+                        print("  No recommendations available")
+                    else:
+                        for i, (_, row) in enumerate(recs.iterrows(), 1):
+                            print(f"  {i}. {row['name']} (Score: {row[score_col]:.4f})")
+
+            except Exception as e:
+                print(f"Error: {e}")
+
+        else:
+            print("Unknown command. Please try again.")
+
+
+# Run the interactive interface if this script is executed directly
+if __name__ == "__main__":
+    try:
+        interactive_recommendations()
+    except KeyboardInterrupt:
+        print("\nExiting recommendation system. Goodbye!")
